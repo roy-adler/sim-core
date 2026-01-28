@@ -121,6 +121,7 @@
   },
   "devDependencies": {
     "@testing-library/react": "11.2.2",
+    "@types/glob": "*",
     "@types/js-levenshtein": "^1.1.1",
     "@types/line-column": "^1.0.0",
     "@vitejs/plugin-react": "^4.2.0",
