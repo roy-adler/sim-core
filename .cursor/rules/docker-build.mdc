@@ -14,7 +14,8 @@ alwaysApply: true
 
 ## What already works (keep working)
 
-- WASM JS bridges use `serde-wasm-bindgen` via helpers in `packages/engine-web/rust/util.rs` (`to_js_value` / `from_js_value`). Do **not** bring back deprecated `JsValue::from_serde` / `into_serde`.
+- WASM↔JS bridges use JSON round-trips in `packages/engine-web/rust/util.rs` (`to_js_value` / `from_js_value` via `serde_json` + `js_sys::JSON`). This matches historical `JsValue::from_serde` / `into_serde`.
+- Do **not** use default `serde_wasm_bindgen::to_value` / `from_value`: Maps/`undefined` break the UI, and `from_value` mangles `AgentState` custom fields (symptoms: no agents, or `null.concat` in behaviors like `Multi_Ben_Or_Node.js`).
 - `wasm-pack` is pinned in the Dockerfile to `0.15.0` via `cargo install`.
 - `packages/engine-web/LICENSE.md` exists so wasm-pack stops complaining; Cargo `license` is `AGPL-3.0-only` (match package.json / root LICENSE). Do not set both `license` and `license-file`.
 - Vendor `fux_kdtree` must keep **`edition = "2015"`**. `2018` breaks `use kdtree::...` paths. Visibility uses `pub(crate)` for private-module items.

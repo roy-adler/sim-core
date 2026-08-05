@@ -50,11 +50,18 @@ pub fn jsvalue_to_err(v: JsValue) -> SimulationError {
 }
 
 pub fn to_js_value<T: Serialize + ?Sized>(value: &T) -> Result<JsValue, JsValue> {
-    serde_wasm_bindgen::to_value(value).map_err(|e| err_to_jsvalue(e.to_string()))
+    // Exact historical JsValue::from_serde semantics (JSON round-trip).
+    // Needed for AgentState's custom deserializer / HashMap custom fields.
+    let json = serde_json::to_string(value).map_err(|e| err_to_jsvalue(e.to_string()))?;
+    js_sys::JSON::parse(&json)
 }
 
 pub fn from_js_value<T: DeserializeOwned>(value: &JsValue) -> Result<T, JsValue> {
-    serde_wasm_bindgen::from_value(value.clone()).map_err(|e| err_to_jsvalue(e.to_string()))
+    // Exact historical JsValue::into_serde semantics (JSON round-trip).
+    // serde_wasm_bindgen::from_value drops/mangles AgentState custom fields.
+    let json = js_sys::JSON::stringify(value)?;
+    let json = String::from(json);
+    serde_json::from_str(&json).map_err(|e| err_to_jsvalue(e.to_string()))
 }
 
 #[wasm_bindgen]
