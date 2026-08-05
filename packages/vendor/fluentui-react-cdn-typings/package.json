@@ -1,0 +1,10 @@
+{
+  "name": "@msrvida/fluentui-react-cdn-typings",
+  "version": "1.0.2",
+  "description": "Vendored SandDance FluentUI typings with corrected @types/react peer (^16.9.34 instead of exact 16.9.34)",
+  "types": "index.d.ts",
+  "license": "MIT",
+  "peerDependencies": {
+    "@types/react": "^16.9.34"
+  }
+}

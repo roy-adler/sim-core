@@ -136,7 +136,8 @@
   },
   "resolutions": {
     "@types/react": "16.9.56",
-    "@types/react-dom": "16.9.9"
+    "@types/react-dom": "16.9.9",
+    "@msrvida/fluentui-react-cdn-typings": "file:packages/vendor/fluentui-react-cdn-typings"
   },
   "dependencies": {}
 }
