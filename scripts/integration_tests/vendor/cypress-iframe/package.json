@@ -2,7 +2,7 @@
   "name": "cypress-iframe",
   "version": "1.0.1",
   "description": "Adds iframe support to Cypress (vendored; upstream peer @types/cypress removed — Cypress ships its own types)",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "types": "index.d.ts",
   "license": "MIT",
   "repository": {
