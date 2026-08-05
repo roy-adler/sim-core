@@ -9,6 +9,77 @@ import topLevelAwait from "vite-plugin-top-level-await";
 const monacoEditorPlugin = (monacoEditorPluginCJS as any).default;
 const utc = (timestampCJS as any).utc;
 
+/**
+ * Lazy/route deps that Vite would otherwise discover mid-session. That rewrites
+ * `.vite/deps` and breaks already-loaded chunks (ErrorBoundary). Extend this
+ * when Docker logs show "new dependencies optimized".
+ */
+const PREBUNDLE_DEPS = [
+  "acorn",
+  "bowser",
+  "classnames",
+  "clipboard-polyfill",
+  "date-fns/format",
+  "escape-string-regexp",
+  "file-saver",
+  "fp-ts/es6/Option",
+  "fp-ts/es6/Record",
+  "fp-ts/es6/function",
+  "fp-ts/es6/pipeable",
+  "hookrouter",
+  "idb-keyval",
+  "immer",
+  "js-levenshtein",
+  "json-stringify-pretty-compact",
+  "jstat",
+  "jszip",
+  "line-column",
+  "lodash-es",
+  "lodash-es/findLastIndex",
+  "lodash-es/omit",
+  "lodash-es/orderBy",
+  "monaco-editor",
+  "monocle-ts",
+  "nanoid",
+  "neverthrow",
+  "papaparse",
+  "promise-worker-transferable",
+  "promise-worker-transferable/register",
+  "react-dropzone",
+  "react-hook-form",
+  "react-mapbox-gl",
+  "react-markdown",
+  "react-modal-hook",
+  "react-plotly.js",
+  "react-promise-suspense",
+  "react-redux",
+  "react-select",
+  "react-select/creatable",
+  "react-shepherd",
+  "react-splitter-layout",
+  "react-svg",
+  "react-tabs",
+  "react-three-fiber",
+  "react-timeago",
+  "react-tiny-popover",
+  "react-transition-group",
+  "react-window",
+  "recoil",
+  "reselect",
+  "rxjs",
+  "rxjs/operators",
+  "simplebar-react",
+  "slugify",
+  "three",
+  "three/examples/jsm/loaders/MTLLoader",
+  "three/examples/jsm/loaders/OBJLoader",
+  "three/examples/jsm/utils/BufferGeometryUtils",
+  "url-join",
+  "uuid",
+  "@react-three/drei",
+  "@reduxjs/toolkit",
+];
+
 export default defineConfig(({ mode }) => {
   const isProduction = mode === "production";
 
@@ -42,9 +113,20 @@ export default defineConfig(({ mode }) => {
       allowedHosts: [
         "localhost",
         ...(process.env.VITE_ALLOWED_HOST
-          ? process.env.VITE_ALLOWED_HOST.split(",").map((host) => host.trim()).filter(Boolean)
+          ? process.env.VITE_ALLOWED_HOST.split(",")
+              .map((host) => host.trim())
+              .filter(Boolean)
           : []),
       ],
+      warmup: {
+        clientFiles: [
+          "./index.html",
+          "./embed.html",
+          "./index.tsx",
+          "./components/App/**/*.{ts,tsx}",
+          "./features/**/*.{ts,tsx}",
+        ],
+      },
     },
     preview: {
       port: 8080,
@@ -65,6 +147,10 @@ export default defineConfig(({ mode }) => {
     worker: {
       plugins: () => [wasm(), topLevelAwait()],
       format: "es",
+    },
+    optimizeDeps: {
+      include: PREBUNDLE_DEPS,
+      entries: ["./index.html", "./embed.html", "./index.tsx"],
     },
     plugins: [wasm(), topLevelAwait(), react(), monacoEditorPlugin({})],
   };

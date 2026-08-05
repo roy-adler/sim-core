@@ -8,8 +8,10 @@ services:
     ports:
       - "3000:8080"
     volumes:
-      # Mount source code for hot reloading (optional)
+      # Mount source + Vite config so dep-optimize fixes apply without full rebuild
       - ./packages/core/src:/app/packages/core/src
+      - ./packages/core/vite.config.ts:/app/packages/core/vite.config.ts
+      - ./packages/core/package.json:/app/packages/core/package.json
       - ./packages/engine-web/src:/app/packages/engine-web/src
     environment:
       - NODE_ENV=development
