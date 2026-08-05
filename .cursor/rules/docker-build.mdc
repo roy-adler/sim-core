@@ -14,8 +14,11 @@ alwaysApply: true
 
 ## What already works (keep working)
 
-- WASM↔JS bridges use JSON round-trips in `packages/engine-web/rust/util.rs` (`to_js_value` / `from_js_value` via `serde_json` + `js_sys::JSON`). This matches historical `JsValue::from_serde` / `into_serde`.
-- Do **not** use default `serde_wasm_bindgen::to_value` / `from_value`: Maps/`undefined` break the UI, and `from_value` mangles `AgentState` custom fields (symptoms: no agents, or `null.concat` in behaviors like `Multi_Ben_Or_Node.js`).
+- WASM↔JS uses **`serde-wasm-bindgen`** in `packages/engine-web/rust/util.rs` (`to_js_value` / `from_js_value`). Do not reintroduce deprecated `JsValue::from_serde` / `into_serde`.
+- **Required pattern** (breaks sims if "simplified"):
+  - Rust→JS: `serde_json::to_value` → `Serializer::json_compatible()` (never bare `to_value`)
+  - JS→Rust: `from_value::<serde_json::Value>` → `serde_json::from_value::<T>` (never bare `from_value::<AgentState>`)
+- Why: default mode emits ES `Map`/`undefined` (no agents in UI). Direct `from_value` on `AgentState` drops custom fields (`null.concat` in behaviors like `Multi_Ben_Or_Node.js`). Going through `serde_json::Value` keeps custom Serde impls working across crate upgrades.
 - `wasm-pack` is pinned in the Dockerfile to `0.15.0` via `cargo install`.
 - `packages/engine-web/LICENSE.md` exists so wasm-pack stops complaining; Cargo `license` is `AGPL-3.0-only` (match package.json / root LICENSE). Do not set both `license` and `license-file`.
 - Vendor `fux_kdtree` must keep **`edition = "2015"`**. `2018` breaks `use kdtree::...` paths. Visibility uses `pub(crate)` for private-module items.
