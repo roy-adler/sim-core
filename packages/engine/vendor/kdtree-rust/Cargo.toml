@@ -2,6 +2,7 @@
 name = "fux_kdtree"
 version = "0.2.0"
 authors = ["fulara <ntszar@gmail.com>"]
+edition = "2015"
 repository = "https://github.com/fulara/kdtree-rust"
 keywords = ["tree", "dimension", "nearest", "search", "neighbor"]
 readme = "README.md"

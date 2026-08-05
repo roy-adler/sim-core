@@ -1,5 +1,5 @@
 #![allow(clippy::needless_pass_by_value)]
-use crate::util::jsvalue_to_err;
+use crate::util::{from_js_value, jsvalue_to_err, to_js_value};
 use futures::future::FutureExt;
 use hashintel_core::prelude::*;
 use js_sys::{Array, Promise};
@@ -55,7 +55,7 @@ pub struct MessageHandlerState {
 impl MessageHandlerState {
     #[must_use]
     pub fn get_messages(&self) -> Array {
-        Array::from(&JsValue::from_serde(&self.messages.clone()).unwrap())
+        Array::from(&to_js_value(&self.messages).unwrap())
     }
 
     pub fn remove_agent(&mut self, agent_id: String) {
@@ -63,17 +63,13 @@ impl MessageHandlerState {
     }
 
     pub fn add_agent(&mut self, agent: &JsValue) -> Result<(), JsValue> {
-        let agent_serde = agent
-            .into_serde()
-            .map_err(|e| JsValue::from(e.to_string()))?;
+        let agent_serde = from_js_value(agent)?;
         self.results.added.push(agent_serde);
         Ok(())
     }
 
     pub fn add_message(&mut self, message: &JsValue) -> Result<(), JsValue> {
-        let message_serde = message
-            .into_serde()
-            .map_err(|e| JsValue::from(e.to_string()))?;
+        let message_serde = from_js_value(message)?;
         self.results.messages.push(message_serde);
         Ok(())
     }

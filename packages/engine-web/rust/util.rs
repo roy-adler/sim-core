@@ -1,5 +1,7 @@
 use hashintel_core::prelude::*;
 use js_sys::Error;
+use serde::de::DeserializeOwned;
+use serde::Serialize;
 use serde_json::json;
 use wasm_bindgen::prelude::*;
 
@@ -47,6 +49,14 @@ pub fn jsvalue_to_err(v: JsValue) -> SimulationError {
     JsError(v).into()
 }
 
+pub fn to_js_value<T: Serialize + ?Sized>(value: &T) -> Result<JsValue, JsValue> {
+    serde_wasm_bindgen::to_value(value).map_err(|e| err_to_jsvalue(e.to_string()))
+}
+
+pub fn from_js_value<T: DeserializeOwned>(value: &JsValue) -> Result<T, JsValue> {
+    serde_wasm_bindgen::from_value(value.clone()).map_err(|e| err_to_jsvalue(e.to_string()))
+}
+
 #[wasm_bindgen]
 pub fn list_behaviors() -> Result<JsValue, JsValue> {
     let simple_list: Vec<serde_json::Value> = BUILTIN_BEHAVIORS
@@ -58,5 +68,5 @@ pub fn list_behaviors() -> Result<JsValue, JsValue> {
             })
         })
         .collect();
-    JsValue::from_serde(&simple_list).map_err(err_to_jsvalue)
+    to_js_value(&simple_list)
 }

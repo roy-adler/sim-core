@@ -59,7 +59,7 @@ fn partition_sliding_midpoint_helper<T: KdtreePointTrait>(
 }
 
 #[allow(clippy::module_name_repetitions)]
-pub fn partition_sliding_midpoint<T: KdtreePointTrait>(
+pub(crate) fn partition_sliding_midpoint<T: KdtreePointTrait>(
     vec: &mut [T],
     midpoint_value: f64,
     partition_on_dimension: usize,

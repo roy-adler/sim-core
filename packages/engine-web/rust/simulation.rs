@@ -1,7 +1,7 @@
 use crate::behavior::{behavior_from_js_behavior, JsCustomBehaviors};
 use crate::messagehandler::{run_message_handler, JsMessageHandlers};
 
-use crate::util::err_to_jsvalue;
+use crate::util::{err_to_jsvalue, from_js_value, to_js_value};
 use futures::future::FutureExt;
 use futures::stream::{Stream, StreamExt};
 use hashintel_core::prelude::*;
@@ -20,17 +20,14 @@ pub fn start_simulation(
     js_custom_behaviors: &JsCustomBehaviors,
     js_message_handlers: &JsMessageHandlers,
 ) -> Result<StateIteratorWrapper, JsValue> {
-    let initial_state: SimulationState = initial_state.into_serde().map_err(err_to_jsvalue)?;
+    let initial_state: SimulationState = from_js_value(initial_state)?;
 
     // Create a place in memory to store our behavior lambdas
     let mut custom_behaviors = vec![];
     for i in 0..js_custom_behaviors.len() {
         let js_behavior = js_custom_behaviors.behavior(i);
         let name = js_behavior.name();
-        let dependencies: Vec<String> = js_behavior
-            .dependencies()
-            .into_serde()
-            .map_err(err_to_jsvalue)?;
+        let dependencies: Vec<String> = from_js_value(&js_behavior.dependencies())?;
         let behavior = behavior_from_js_behavior(js_behavior);
         custom_behaviors.push(NamedBehavior::new(&name, behavior, &dependencies));
     }
@@ -44,9 +41,9 @@ pub fn start_simulation(
         custom_message_handlers.push(MessageHandler::new(&name, Box::pin(pinned)));
     }
 
-    let properties: Properties = properties.into_serde().map_err(err_to_jsvalue)?;
+    let properties: Properties = from_js_value(properties)?;
 
-    let datasets: serde_json::Value = datasets.into_serde().map_err(err_to_jsvalue)?;
+    let datasets: serde_json::Value = from_js_value(datasets)?;
     let datasets = datasets
         .as_object()
         .unwrap_or(&DatasetMap::new())
@@ -81,7 +78,7 @@ pub fn next_state(iter: *mut StateIteratorWrapper) -> Promise {
     unsafe {
         future_to_promise((*iter).iterator.next().map(|state| {
             match state {
-                Some(Ok(state)) => JsValue::from_serde(&*state).map_err(err_to_jsvalue),
+                Some(Ok(state)) => to_js_value(&*state),
                 Some(Err(err)) => Err(err_to_jsvalue(err)),
 
                 // cannot happen
@@ -101,6 +98,6 @@ impl StateIteratorWrapper {
 
     #[wasm_bindgen]
     pub fn initial_state(&self) -> Result<JsValue, JsValue> {
-        JsValue::from_serde(&self.initial_state).map_err(err_to_jsvalue)
+        to_js_value(&self.initial_state)
     }
 }
