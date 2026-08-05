@@ -49,33 +49,24 @@ pub fn jsvalue_to_err(v: JsValue) -> SimulationError {
     JsError(v).into()
 }
 
-/// Rust → JS via `serde-wasm-bindgen` (replacement for deprecated `JsValue::from_serde`).
+/// Rust → JS via `serde-wasm-bindgen`.
 ///
-/// Stable contract — keep this even when upgrading crates:
-/// 1. Domain types first become `serde_json::Value` so custom `Serialize` impls
-///    (especially `AgentState`) run the same path as the rest of the engine.
-/// 2. JS encoding uses `Serializer::json_compatible()` so we emit plain objects and
-///    `null`, matching historical JSON/`from_serde` behaviour.
-///
-/// Never call bare `serde_wasm_bindgen::to_value`: default mode emits ES `Map` /
-/// `undefined` and breaks the simulation UI.
+/// Uses `Serializer::json_compatible()` so plain objects/`null` are emitted
+/// (matches historical `from_serde` / JSON UI expectations). Do not use bare
+/// `to_value` here — default mode emits ES `Map`/`undefined`.
 pub fn to_js_value<T: Serialize + ?Sized>(value: &T) -> Result<JsValue, JsValue> {
-    let value = serde_json::to_value(value).map_err(|e| err_to_jsvalue(e.to_string()))?;
     value
         .serialize(&serde_wasm_bindgen::Serializer::json_compatible())
         .map_err(|e| err_to_jsvalue(e.to_string()))
 }
 
-/// JS → Rust via `serde-wasm-bindgen` (replacement for deprecated `JsValue::into_serde`).
+/// JS → Rust via `serde-wasm-bindgen::from_value`.
 ///
-/// Stable contract — keep this even when upgrading crates:
-/// Decode JS into `serde_json::Value` first, then `serde_json::from_value` into `T`.
-/// Direct `from_value::<AgentState>` bypasses / breaks the custom deserializer and
-/// drops custom fields (`decidedList`, `allMessages`, … → `null.concat` in behaviors).
+/// Safe for `Agent` because it deserializes with `deserialize_map` (custom fields
+/// are not dropped). Prefer these helpers over ad-hoc calls so UI JSON semantics
+/// stay consistent.
 pub fn from_js_value<T: DeserializeOwned>(value: &JsValue) -> Result<T, JsValue> {
-    let value: serde_json::Value =
-        serde_wasm_bindgen::from_value(value.clone()).map_err(|e| err_to_jsvalue(e.to_string()))?;
-    serde_json::from_value(value).map_err(|e| err_to_jsvalue(e.to_string()))
+    serde_wasm_bindgen::from_value(value.clone()).map_err(|e| err_to_jsvalue(e.to_string()))
 }
 
 #[wasm_bindgen]

@@ -14,13 +14,13 @@ alwaysApply: true
 
 ## What already works (keep working)
 
-- WASM↔JS uses **`serde-wasm-bindgen`** in `packages/engine-web/rust/util.rs` (`to_js_value` / `from_js_value`). Do not reintroduce deprecated `JsValue::from_serde` / `into_serde`.
-- **Required pattern** (breaks sims if "simplified"):
-  - Rust→JS: `serde_json::to_value` → `Serializer::json_compatible()` (never bare `to_value`)
-  - JS→Rust: `from_value::<serde_json::Value>` → `serde_json::from_value::<T>` (never bare `from_value::<AgentState>`)
-- Why: default mode emits ES `Map`/`undefined` (no agents in UI). Direct `from_value` on `AgentState` drops custom fields (`null.concat` in behaviors like `Multi_Ben_Or_Node.js`). Going through `serde_json::Value` keeps custom Serde impls working across crate upgrades.
+- WASM↔JS uses thin helpers in `packages/engine-web/rust/util.rs`:
+  - `to_js_value` → `Serializer::json_compatible()` (not bare `to_value`)
+  - `from_js_value` → `serde_wasm_bindgen::from_value`
+- `Agent` deserializes with **`deserialize_map`**, not `deserialize_struct` + `BUILTIN_FIELDS`. serde-wasm-bindgen’s struct walker only visits declared fields and would drop custom keys (`decidedList`, `allMessages` → `null.concat` in behaviors). Do not revert that.
+- Do not reintroduce deprecated `JsValue::from_serde` / `into_serde`, and do not add a `serde_json::Value` round-trip workaround unless a *new* type hits the same struct-field-list trap.
 - `wasm-pack` is pinned in the Dockerfile to `0.15.0` via `cargo install`.
-- `packages/engine-web/LICENSE.md` exists so wasm-pack stops complaining; Cargo `license` is `AGPL-3.0-only` (match package.json / root LICENSE). Do not set both `license` and `license-file`.
+- `packages/engine-web/LICENSE.md` exists so wasm-pack stops complaining; Cargo `license` is `AGPL-3.0-only`. Do not set both `license` and `license-file`.
 - Vendor `fux_kdtree` must keep **`edition = "2015"`**. `2018` breaks `use kdtree::...` paths. Visibility uses `pub(crate)` for private-module items.
 - `docker-compose.yml` has **no** top-level `version:` (obsolete in Compose v2+).
 - Yarn resolutions pin `@types/react` / `@types/react-dom` to 16.x; `tinygradient` is a direct core dependency for `gradient-path`.

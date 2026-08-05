@@ -364,7 +364,10 @@ impl<'de> Deserialize<'de> for Agent {
                 Ok(agent_state_buf)
             }
         }
-        deserializer.deserialize_struct("AgentState", &BUILTIN_FIELDS, AgentVisitor)
+        // Use deserialize_map (not deserialize_struct): serde-wasm-bindgen's
+        // deserialize_struct only walks the declared field list and would drop
+        // custom agent keys (decidedList, allMessages, …).
+        deserializer.deserialize_map(AgentVisitor)
     }
 }
 
@@ -396,8 +399,6 @@ fn to_f64_default(val: Option<&serde_json::Value>, default: f64) -> Option<f64> 
 }
 
 #[test]
-/// This test describes the scenario in which a message is parsed before the agent_id key
-/// when enumerating over the MapAccess entries when deserializing JSON
 fn deserialize_messages_before_agent_id() {
     let agent: Agent = serde_json::from_str(
         r#"
@@ -415,6 +416,25 @@ fn deserialize_messages_before_agent_id() {
     {
         assert_eq!(agent.agent_id, data.agent_id);
     }
+}
+
+#[test]
+fn deserialize_custom_fields_survives_json_roundtrip() {
+    let agent: Agent = serde_json::from_str(
+        r#"
+        {
+            "agent_id": "custom-agent",
+            "decidedList": [1, 2, 3],
+            "allMessages": []
+        }
+        "#,
+    )
+    .expect("Should be valid AgentState");
+    assert_eq!(
+        agent.custom.get("decidedList"),
+        Some(&serde_json::json!([1, 2, 3]))
+    );
+    assert_eq!(agent.custom.get("allMessages"), Some(&serde_json::json!([])));
 }
 
 #[test]
