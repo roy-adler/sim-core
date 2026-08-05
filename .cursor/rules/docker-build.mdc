@@ -25,16 +25,21 @@ alwaysApply: true
 - `docker-compose.yml` has **no** top-level `version:` (obsolete in Compose v2+).
 - Yarn resolutions pin `@types/react` / `@types/react-dom` to 16.x; `tinygradient` is a direct core dependency for `gradient-path`.
 
-## Intentionally left as warnings
+## Intentionally remaining install noise
 
-Do not “fix” these without an explicit, tested plan:
+- Docker `yarn install --ignore-scripts` prints `Ignored scripts due to flag` — intentional for layer caching, not a dependency peer issue.
+- Browser npm CLI “new major version” notices are unrelated to the workspace.
 
-| Warning | Why deferred |
+## Previously resolved peer warnings
+
+Do not reintroduce these:
+
+| Was | Fix |
 |---|---|
-| `vite-plugin-monaco-editor` wants `monaco-editor@>=0.33` (we pin `0.25.2`) | Broad API/worker/Jest surface; high UI regression risk |
-| sanddance `fluentui-react-cdn-typings` wants `@types/react@16.9.34` | Peer noise vs our `16.9.56` resolution |
-| `cypress-iframe` unmet `@types/cypress` | Stub package; Cypress ships its own types |
-| `@deck.gl/layers` vs `@loaders.gl/core` peer | Upstream peer skew; core already uses `@loaders.gl/core: "*"` |
+| `@deck.gl/layers` vs `@loaders.gl/core` | Pin `@loaders.gl/core` to `2.3.0` |
+| `vite-plugin-monaco-editor` vs monaco | `monaco-editor@0.33.0` |
+| `cypress-iframe` unmet `@types/cypress` | Vendored package under `scripts/integration_tests/vendor/cypress-iframe` (no stub types peer) |
+| sanddance `fluentui-react-cdn-typings` exact `@types/react@16.9.34` | Vendored typings with `^16.9.34` via yarn resolution |
 
 ## Yarn lockfile
 
