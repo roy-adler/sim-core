@@ -22,6 +22,7 @@ COPY package.json yarn.lock ./
 COPY packages/core/package.json ./packages/core/
 COPY packages/engine-web/package.json ./packages/engine-web/
 COPY packages/utils/package.json ./packages/utils/
+COPY packages/vendor ./packages/vendor
 COPY scripts/ ./scripts/
 
 # Rust manifests
