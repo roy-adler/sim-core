@@ -1,5 +1,4 @@
 const fs = require("fs");
-const request = require("request");
 const yargs = require("yargs");
 
 const options = yargs.options({
@@ -15,7 +14,7 @@ const options = yargs.options({
   },
 }).argv;
 
-const uploadBehaviorToHASHIndex = (
+const uploadBehaviorToHASHIndex = async (
   cookie: string,
   behavior_name: string,
   behavior_source: string,
@@ -42,12 +41,12 @@ const uploadBehaviorToHASHIndex = (
   const url = "https://api.hash.ai/graphql";
 
   const requestOptions = {
-    url,
     method: "POST",
     headers: {
       Cookie: `connect.sid=${cookie}`,
+      "content-type": "application/json",
     },
-    json: {
+    body: JSON.stringify({
       query: `mutation addIndexListing($data: IndexListingCreationInput!) { 
   addIndexListing(data: $data) {
     id
@@ -56,17 +55,16 @@ const uploadBehaviorToHASHIndex = (
       variables: {
         data,
       },
-    },
+    }),
   };
 
   if (options.dryRun) {
-    console.log(`Requesting ${JSON.stringify(requestOptions, null, 2)}`);
+    console.log(`Requesting ${JSON.stringify({ url, ...requestOptions }, null, 2)}`);
   } else {
-    request(requestOptions, (err: any, resp: any, body: any) => {
-      if (err) throw err;
-      console.log(behavior_name, resp.statusCode);
-      console.log(body);
-    });
+    const resp = await fetch(url, requestOptions);
+    const body = await resp.json();
+    console.log(behavior_name, resp.status);
+    console.log(body);
   }
 };
 
@@ -84,7 +82,7 @@ fs.readdir("builtin_behaviors", {}, (err: any, files: string[]) => {
     let behavior_slug = file;
     fs.readFile(`builtin_behaviors/${file}`, {}, (err: any, data: any) => {
       if (err) throw err;
-      uploadBehaviorToHASHIndex(
+      void uploadBehaviorToHASHIndex(
         cookie!,
         snakeToTitleCase(behavior_name),
         data.toString(),
