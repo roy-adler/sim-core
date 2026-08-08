@@ -1,10 +1,12 @@
 import React, { FC, useRef } from "react";
 import { useFrame } from "react-three-fiber";
 import usePromise from "react-promise-suspense";
+import { useDispatch } from "react-redux";
 import * as THREE from "three";
 import { BufferGeometry, InstancedBufferAttribute } from "three";
 import { useRecoilState, useRecoilValue } from "recoil";
 
+import { showActivity } from "../../../features/viewer/slice";
 import * as sceneState from "../state/SceneState";
 import { RawGeometry, loadGeometryMesh } from "../util/geometry-loader";
 import { lerpAnimValue } from "../util/anim";
@@ -26,6 +28,7 @@ tempObject.up = new THREE.Vector3(0, 0, 1);
  */
 export const AgentMesh: FC<PolyMeshProps> = ({ meshId, clock }) => {
   const ref = useRef<THREE.InstancedMesh>();
+  const dispatch = useDispatch();
 
   const [hoveredAgentId, setHoveredAgentIds] = useRecoilState(
     sceneState.HoveredAgent,
@@ -151,6 +154,7 @@ export const AgentMesh: FC<PolyMeshProps> = ({ meshId, clock }) => {
           } else {
             temp[agentId] = true;
             setSelectedAgentIds(temp);
+            dispatch(showActivity());
           }
         }
       }}
