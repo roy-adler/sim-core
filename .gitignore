@@ -9,6 +9,7 @@
 .old/
 .vscode/
 .config/**/*.log
+.superpowers/
 dist/
 node_modules/
 test_artifacts/
