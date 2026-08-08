@@ -1,11 +1,15 @@
 import React, { FC, lazy, Suspense } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { Scope, useScope } from "../../../features/scopes";
 import { SimulationRunner } from "../../SimulationRunner/SimulationRunner";
 import { SimulationViewer } from "../../SimulationViewer";
 import { WrappedSplitterLayout } from "../../WrappedSplitterLayout/WrappedSplitterLayout";
-import { selectActivityVisible } from "../../../features/viewer/selectors";
+import {
+  getViewer,
+  selectActivityVisible,
+} from "../../../features/viewer/selectors";
+import { showActivity } from "../../../features/viewer/slice";
 import { useInstructionReceiver } from "../useInstructionReceiver";
 import { useResizeObserver } from "../../../hooks/useResizeObserver/useResizeObserver";
 
@@ -21,7 +25,10 @@ const LazyOpenInCore = lazy(() =>
 );
 
 export const HashCoreViewer: FC = () => {
+  const dispatch = useDispatch();
   const activityVisible = useSelector(selectActivityVisible);
+  const { activity, viewer: viewerVisible } = useSelector(getViewer);
+  const showInspectorEdgeTab = viewerVisible && !activity;
   const canShowOpenInCore = useScope(Scope.showOpenInCore);
 
   const onSecondaryPaneSizeChange = (size: number) => {
@@ -62,6 +69,16 @@ export const HashCoreViewer: FC = () => {
         {/* <ActivityHistory visible={activityVisible} /> */}
         <AgentInspectorSplitterLayout />
       </WrappedSplitterLayout>
+      {showInspectorEdgeTab ? (
+        <button
+          type="button"
+          aria-label="Show inspector"
+          className="HashCoreViewer__InspectorEdgeTab"
+          onClick={() => dispatch(showActivity())}
+        >
+          <span className="codicon codicon-chevron-left" />
+        </button>
+      ) : null}
     </div>
   );
 };
