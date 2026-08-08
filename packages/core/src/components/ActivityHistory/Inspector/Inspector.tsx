@@ -1,25 +1,46 @@
 import React, { FC, useState } from "react";
 import classNames from "classnames";
 import { SerializableAgentState } from "@hashintel/engine-web";
+import { useDispatch } from "react-redux";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 import * as sceneState from "../../AgentScene/state/SceneState";
 import { ActivityEmpty } from "../ActivityEmpty";
 import { IconClose } from "../../Icon";
+import { hideActivity } from "../../../features/viewer/slice";
 
 import "./Inspector.css";
 import { WrappedSplitterLayout } from "../../WrappedSplitterLayout/WrappedSplitterLayout";
 
 export const AgentInspector: FC = () => {
+  const dispatch = useDispatch();
   const [selectedAgentIds, setSelectedAgents] = useRecoilState(
     sceneState.SelectedAgentIds,
   );
   const agentIds = Object.keys(selectedAgentIds).reverse();
 
+  const collapseButton = (
+    <button
+      type="button"
+      aria-label="Collapse inspector"
+      className="AgentInspector__Collapse"
+      onClick={(evt) => {
+        evt.preventDefault();
+        dispatch(hideActivity());
+      }}
+    >
+      <span className="codicon codicon-chevron-right" />
+      <span className="codicon codicon-chevron-right" />
+    </button>
+  );
+
   if (agentIds.length === 0) {
     return (
       <div className="AgentInspector">
-        <h2>Inspector</h2>
+        <div className="AgentInspector__Header">
+          <h2>Inspector</h2>
+          <div className="AgentInspector__HeaderActions">{collapseButton}</div>
+        </div>
         <ActivityEmpty>No agent or analysis has been selected.</ActivityEmpty>
       </div>
     );
@@ -31,15 +52,19 @@ export const AgentInspector: FC = () => {
     <div className="AgentInspector">
       <div className="AgentInspector__Header">
         <h2>Inspector</h2>
-        <button
-          onClick={(evt) => {
-            evt.preventDefault();
-            setSelectedAgents({});
-          }}
-          className="AgentInspector__ClearSelection"
-        >
-          Clear
-        </button>
+        <div className="AgentInspector__HeaderActions">
+          <button
+            type="button"
+            onClick={(evt) => {
+              evt.preventDefault();
+              setSelectedAgents({});
+            }}
+            className="AgentInspector__ClearSelection"
+          >
+            Clear
+          </button>
+          {collapseButton}
+        </div>
       </div>
       <div className="AgentInspector__List">{agentData}</div>
     </div>

@@ -135,3 +135,41 @@
   background-color: var(--selected-background-color);
   fill: var(--theme-white);
 }
+
+.AgentInspector__HeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-right: 0.6rem;
+}
+
+.AgentInspector__Collapse {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--theme-grey);
+  cursor: pointer;
+  padding: 0.2rem;
+  border-radius: 0.25rem;
+}
+
+.AgentInspector__Collapse .codicon {
+  font-size: 12px;
+  margin: 0;
+}
+
+.AgentInspector__Collapse .codicon + .codicon {
+  margin-left: -6px;
+}
+
+.AgentInspector__Collapse:hover {
+  background-color: var(--selected-background-color);
+  color: var(--theme-white);
+}
+
+/* Clear button margin moved to HeaderActions */
+.AgentInspector__ClearSelection {
+  margin-right: 0;
+}
