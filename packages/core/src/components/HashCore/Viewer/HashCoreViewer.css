@@ -31,7 +31,8 @@
   cursor: pointer;
 }
 
-.HashCoreViewer__InspectorEdgeTab:hover {
+.HashCoreViewer__InspectorEdgeTab:hover,
+.HashCoreViewer__InspectorEdgeTab:focus-visible {
   background: var(--selected-background-color);
   color: var(--theme-white);
 }
