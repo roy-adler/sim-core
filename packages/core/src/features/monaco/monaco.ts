@@ -189,8 +189,7 @@ const createMonacoSubscriber = () => {
     getTextModelRequired,
 
     subscribe(store: Store<RootState>) {
-      // @ts-expect-error redux problems
-      dispatch = store.dispatch;
+      dispatch = store.dispatch as AppDispatch;
       getState = store.getState;
 
       store.subscribe(() => {

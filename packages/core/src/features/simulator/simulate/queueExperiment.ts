@@ -239,7 +239,6 @@ export const queueExperiment =
        */
       if (selectScope[Scope.save](appState)) {
         beforeQueuePromise = beforeQueuePromise
-          // @ts-expect-error redux
           .then(() => appStore.dispatch(parseAllBehaviorKeys()))
           .then(() => appStore.dispatch(save()))
           .then(() => {
@@ -320,7 +319,6 @@ export const queueExperiment =
                   pendingExperimentId,
                 }),
               );
-              // @ts-expect-error trackEvents
               appStore.dispatch(trackEvents([trackExperimentRunEvent]));
               break;
           }
@@ -404,7 +402,6 @@ export const queueExperiment =
                     return group.pipe(
                       tap((event) => {
                         appStore.dispatch(
-                          // @ts-expect-error trackEvents
                           trackEvents(
                             simulationTrackingEvents(Object.keys(event.plan)),
                           ),
@@ -593,7 +590,6 @@ export const queueExperiment =
 
             const ids = experiment.simulationIds;
             appStore.dispatch(
-              // @ts-expect-error trackEvents
               trackEvents([
                 trackExperimentRunEvent,
                 ...simulationTrackingEvents(ids),

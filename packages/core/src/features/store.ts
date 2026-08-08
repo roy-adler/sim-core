@@ -1,6 +1,6 @@
 import { configureStore, isPlain } from "@reduxjs/toolkit";
 
-import { RootState } from "./types";
+import type { AppDispatch } from "./types";
 import { analysisMiddleware } from "./middleware/analysis";
 import { localStorageMiddleware } from "./middleware/localStorage";
 import { observeMiddleware } from "./utils";
@@ -23,7 +23,7 @@ import { trackingMiddleware } from "./middleware";
  * ```
  */
 
-export const store = configureStore({
+const rawStore = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -40,17 +40,27 @@ export const store = configureStore({
        * queueMiddleware needs to be the first middleware, because its special
        * actions are not compatible with built in middleware (as they contain
        * non-serializable values). This is fine as these actions are just
-       * instructions to the middleware and they never reach reducers or dev
-       * tools. This is the same approach redux toolkit takes to thunk.
+       * instructions to the middleware and they never reach reducers or
+       * dev tools. This is the same approach redux toolkit takes to thunk.
        */
-      .prepend([queueMiddleware])
-      .concat([
-        localStorageMiddleware,
-        trackingMiddleware,
-        analysisMiddleware,
-        observeMiddleware<RootState>(storeActionObservable),
-      ]),
+      .prepend(queueMiddleware)
+      // Middlewares are runtime-compatible; RTK's Middleware generics disagree
+      // across @reduxjs/toolkit vs nested redux type versions (UnknownAction).
+      .concat(
+        localStorageMiddleware as any,
+        trackingMiddleware as any,
+        analysisMiddleware as any,
+        observeMiddleware(storeActionObservable) as any,
+      ),
 });
+
+/**
+ * configureStore's inferred dispatch is unreliable with our middleware stack.
+ * Re-export with our explicit AppDispatch (thunks + queueables).
+ */
+export const store = rawStore as Omit<typeof rawStore, "dispatch"> & {
+  dispatch: AppDispatch;
+};
 
 export type StoreType = typeof store;
 

@@ -1,4 +1,3 @@
-import { Store } from "@reduxjs/toolkit";
 import { Observable, combineLatest, fromEvent, merge } from "rxjs";
 import {
   distinctUntilChanged,
@@ -8,11 +7,11 @@ import {
   startWith,
 } from "rxjs/operators";
 
-import { RootState } from "../types";
 import { Scope, selectScope } from "../scopes";
 import { fromStore } from "../../util/fromStore";
 import { save } from "../thunks";
 import { selectFileActions } from "../files/selectors";
+import type { StoreType } from "../store";
 
 const debounceTimeWithMaximum =
   <T>(
@@ -63,7 +62,7 @@ const debounceTimeWithMaximum =
       });
     });
 
-export const autoSaveSubscribe = (store: Store<RootState>) => {
+export const autoSaveSubscribe = (store: StoreType) => {
   const focus = merge(
     fromEvent(window, "focus").pipe(mapTo(true)),
     fromEvent(window, "blur").pipe(mapTo(false)),
@@ -88,8 +87,7 @@ export const autoSaveSubscribe = (store: Store<RootState>) => {
   );
 
   actionsWhenFocused.subscribe(() => {
-    // @ts-expect-error redux problems
-    store.dispatch(save()).catch((err) => {
+    store.dispatch(save()).catch((err: unknown) => {
       console.error("Failed to save", err);
     });
   });

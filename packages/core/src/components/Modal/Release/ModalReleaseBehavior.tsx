@@ -108,7 +108,6 @@ export const ModalReleaseBehavior: FC<ModalPublishBehaviorToIndexProps> = ({
     try {
       await handleQueryCodeErrors(values, setError, async () => {
         const { forkedBehaviors } = await dispatch(
-          //@ts-expect-error redux problems
           forkAndReleaseBehaviors({
             projectPath: project.pathWithNamespace,
             name: values.name,

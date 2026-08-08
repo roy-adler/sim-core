@@ -101,7 +101,6 @@ export const FileBannerWrapper: FC<FileBannerWrapperProps> = ({
         labelB={`Upgrade to (v${latestTag})`}
         onChooseB={async () => {
           await dispatch(
-            //@ts-expect-error redux problems
             addDependencies({
               [file.path.formatted]: latestTag,
             }),

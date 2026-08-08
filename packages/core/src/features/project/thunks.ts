@@ -38,7 +38,6 @@ export const forkProject =
     );
 
     dispatch(
-      //@ts-expect-error redux type problems
       trackEvent({
         action: "Fork Project: Core",
         label: [project.type, project.pathWithNamespace, project.ref].join(
@@ -55,7 +54,6 @@ export const forkProject =
       dispatch(addUserProject(preparePartialSimulationProject(nextProject)));
     }
 
-    // @ts-expect-error redux problems
     dispatch(setProjectWithMeta(nextProject));
     navigate(urlFromProject(nextProject));
     dispatch(displayToast({ kind: ToastKind.ProjectForked, data: project }));

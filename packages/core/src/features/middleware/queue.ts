@@ -5,24 +5,22 @@
  */
 import { Middleware } from "@reduxjs/toolkit";
 
-import { AppDispatch, RootState } from "../types";
+import type {
+  AppDispatch,
+  QueueableAction,
+  QueueDispatch,
+  QueuedCallback,
+  RootState,
+} from "../types";
 
-const QUEUE_ACTION_TAG = "__QUEUED_ACTION_TYPE";
+export type { QueueableAction, QueueDispatch, QueuedCallback };
 
-type QueuedCallback = (
-  next: VoidFunction,
-  getState: () => RootState,
-  dispatch: AppDispatch,
-) => void;
+const QUEUE_ACTION_TAG = "__QUEUED_ACTION_TYPE" as const;
 
-export interface QueueableAction {
-  [QUEUE_ACTION_TAG]: string;
-  handler: QueuedCallback;
-}
-
-export type QueueDispatch = (queueableAction: QueueableAction) => Promise<void>;
-
-const queueAction = (queue: string, handler: QueuedCallback) => ({
+const queueAction = (
+  queue: string,
+  handler: QueuedCallback,
+): QueueableAction => ({
   [QUEUE_ACTION_TAG]: queue,
   handler,
 });
@@ -39,23 +37,13 @@ export const createActionQueue = (name: string) => {
   const fullName = `QUEUE_${name}`;
 
   return {
-    queue: (handler: QueuedCallback) => queueAction(fullName, handler),
+    queue: (handler: QueuedCallback): QueueableAction =>
+      queueAction(fullName, handler),
   };
 };
 
 const isQueueable = (action: any): action is QueueableAction =>
   QUEUE_ACTION_TAG in action;
-
-/**
- * Redux behaviour changed by middleware, so overloads here
- */
-declare module "redux" {
-  //@ts-expect-error fix this as part of dispatch type problems
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  export type Dispatch<A extends Action = AnyAction> = (
-    action: QueueableAction,
-  ) => Promise<void>;
-}
 
 export const queueMiddleware: Middleware<QueueDispatch, RootState> = (
   store,
@@ -75,8 +63,7 @@ export const queueMiddleware: Middleware<QueueDispatch, RootState> = (
             dequeue(key);
           },
           store.getState,
-          //@ts-expect-error redux type problems
-          store.dispatch,
+          store.dispatch as AppDispatch,
         );
       }
     }

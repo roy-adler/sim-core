@@ -1,9 +1,7 @@
 import React, { FC, useEffect, useLayoutEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { useModal } from "react-modal-hook";
 import { unwrapResult } from "@reduxjs/toolkit";
 
-import { AppDispatch } from "../../../features/types";
 import {
   LinkableProject,
   SimulationProject,
@@ -16,6 +14,7 @@ import { forkProject } from "../../../features/project/thunks";
 import { selectBootstrapped } from "../../../features/user/selectors";
 import { selectCurrentProject } from "../../../features/project/selectors";
 import { urlFromProject } from "../../../routes";
+import { useAppDispatch, useAppSelector } from "../../../features/hooks";
 import { useFatalError } from "../../ErrorBoundary/ErrorBoundary";
 import { useNavigateAway } from "./hooks";
 
@@ -23,9 +22,9 @@ const useEnsureProject = (
   project: LinkableProject,
   onCancel: VoidFunction,
 ): SimulationProject | null => {
-  const dispatch = useDispatch<AppDispatch>();
-  const currentProject = useSelector(selectCurrentProject);
-  const bootstrapped = useSelector(selectBootstrapped);
+  const dispatch = useAppDispatch();
+  const currentProject = useAppSelector(selectCurrentProject);
+  const bootstrapped = useAppSelector(selectBootstrapped);
   const fatalError = useFatalError();
   const isCurrentProject =
     !!(project && currentProject) &&
@@ -38,12 +37,10 @@ const useEnsureProject = (
 
   useEffect(() => {
     if (bootstrapped && !isCurrentProject && project) {
-      //@ts-expect-error redux problems
       const promise = dispatch(fetchProject({ project, redirect: false }));
 
       (async () => {
         try {
-          //@ts-expect-error redux problems
           const result = unwrapResult(await promise);
 
           if (!result) {
@@ -69,7 +66,7 @@ export const HashRouterEffectFork: FC<{
   project: LinkableProject;
 }> = ({ project: targetProject }) => {
   const navigateAway = useNavigateAway(targetProject);
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const { canFork, canForkIfSignedIn, canLogin } = useScopes(
     Scope.fork,
     Scope.forkIfSignedIn,
@@ -88,7 +85,6 @@ export const HashRouterEffectFork: FC<{
         <ModalNewProject
           onCancel={navigateAway}
           onSubmit={async (values) => {
-            //@ts-expect-error redux problems
             await dispatch(forkProject(project, values));
             hideForkModal();
           }}

@@ -9,12 +9,12 @@ export const projectUpdatedSort = (
 ) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
 
 export const observeMiddleware =
-  <T>(subject: Subject<AnyAction>): Middleware<{}, T> =>
+  <T>(subject: Subject<AnyAction>): Middleware =>
   () =>
   (next) =>
   (action) => {
     const result = next(action);
-    subject.next(action);
+    subject.next(action as AnyAction);
     return result;
   };
 

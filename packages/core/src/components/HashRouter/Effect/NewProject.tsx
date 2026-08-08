@@ -1,13 +1,12 @@
 import { navigate } from "hookrouter";
 import React, { FC, useEffect } from "react";
 import { useModal } from "react-modal-hook";
-import { useDispatch } from "react-redux";
 
 import { setProjectWithMeta } from "../../../features/actions";
 import { trackEvent } from "../../../features/analytics";
+import { useAppDispatch } from "../../../features/hooks";
 import { preparePartialSimulationProject } from "../../../features/project/utils";
 import { Scope, useScopes } from "../../../features/scopes";
-import { AppDispatch } from "../../../features/types";
 import { addUserProject } from "../../../features/user/slice";
 import { forceLogIn } from "../../../features/user/utils";
 import { useSafeQueryParams } from "../../../hooks/useSafeQueryParams";
@@ -20,7 +19,7 @@ import { createNewSimulationProjectFromTemplate } from "./templates/templates";
 export const HashRouterEffectNewProject: FC<{ template?: string }> = ({
   template = "empty",
 }) => {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigateAway = useNavigateAway();
   const [{ namespace }] = useSafeQueryParams();
   const { canNewProject, canNewProjectIfSignedIn } = useScopes(
@@ -46,7 +45,6 @@ export const HashRouterEffectNewProject: FC<{ template?: string }> = ({
           );
 
           dispatch(
-            //@ts-expect-error redux problems
             trackEvent({
               action: "New Project: Core",
               label: project.pathWithNamespace,
@@ -54,7 +52,6 @@ export const HashRouterEffectNewProject: FC<{ template?: string }> = ({
           );
 
           dispatch(addUserProject(preparePartialSimulationProject(project)));
-          //@ts-expect-error redux problems
           dispatch(setProjectWithMeta(project));
           navigate(urlFromProject(project), false, {}, true);
         }}

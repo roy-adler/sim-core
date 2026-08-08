@@ -235,7 +235,6 @@ export const useImportFiles = () => {
     };
 
     dispatch(
-      // @ts-expect-error redux problems
       trackEvent({
         action: "Import Project: Core",
         label: project.pathWithNamespace,
@@ -243,7 +242,6 @@ export const useImportFiles = () => {
     );
 
     dispatch(addUserProject(preparePartialSimulationProject(project)));
-    // @ts-expect-error redux problems
     dispatch(setProjectWithMeta(project));
     navigate(urlFromProject(project), false, {}, true);
     await dispatch(save());

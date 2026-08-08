@@ -15,7 +15,6 @@ const noop = () => {};
 it("renders without crashing", () => {
   const div = document.createElement("div");
 
-  //@ts-expect-error redux problems
   store.dispatch(setProjectWithMeta(mockProject));
 
   ReactDOM.render(

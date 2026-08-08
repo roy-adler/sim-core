@@ -29,7 +29,6 @@ export const ModalNewDataset: FC<{ onClose: VoidFunction }> = ({ onClose }) => {
       setState("uploading");
 
       try {
-        //@ts-expect-error redux problems
         await dispatch(createDataset(file));
         onClose();
       } catch (err) {

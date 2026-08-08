@@ -22,6 +22,7 @@ import {
   SimulationProject,
 } from "./project/types";
 import { Scope, selectScope } from "./scopes";
+import type { AppDispatch, AppThunk } from "./types";
 // import { Octokit } from "@octokit/rest";
 
 // const authKey = "github-auth";
@@ -77,49 +78,54 @@ const saveQueue = createActionQueue("save");
 
 /**
  * @warning You cannot catch errors from save because it is queued.
+ * Wraps the queueable in an AppThunk so nested thunks can `await dispatch(save())`
+ * without needing QueueDispatch on ThunkDispatch.
  */
-export const save = () =>
-  saveQueue.queue((next, getState, dispatch) => {
-    try {
-      const state = getState();
-      const project = selectCurrentProject(state);
+export const save =
+  (): AppThunk<Promise<void>> => (dispatch) =>
+    (dispatch as AppDispatch)(
+      saveQueue.queue((next, getState, dispatch) => {
+        try {
+          const state = getState();
+          const project = selectCurrentProject(state);
 
-      if (!project) {
-        throw new Error("Cannot save without a project");
-      }
+          if (!project) {
+            throw new Error("Cannot save without a project");
+          }
 
-      const actions = selectFileActions(state);
-      const canSave = selectScope[Scope.save](state);
+          const actions = selectFileActions(state);
+          const canSave = selectScope[Scope.save](state);
 
-      if (!canSave || actions.length === 0) {
-        return;
-      }
+          if (!canSave || actions.length === 0) {
+            return;
+          }
 
-      try {
-        dispatch(beginActionSave(actions.map((action) => action.uuid)));
-        // migration shim -- disable these API requests until they can talk to github.
+          try {
+            dispatch(beginActionSave(actions.map((action) => action.uuid)));
+            // migration shim -- disable these API requests until they can talk to github.
 
-        // const { data } = await octokit.request("/user");
-        // console.log("github data:", data);
-        //
-        // const { result: updatedAt, commit } = await commitActions(
-        //   project.pathWithNamespace,
-        //   actions,
-        //   false,
-        //   project.access?.code
-        // );
+            // const { data } = await octokit.request("/user");
+            // console.log("github data:", data);
+            //
+            // const { result: updatedAt, commit } = await commitActions(
+            //   project.pathWithNamespace,
+            //   actions,
+            //   false,
+            //   project.access?.code
+            // );
 
-        // dispatch(projectUpdated({ updatedAt, actions, commit }));
-      } catch (err) {
-        if (err instanceof Error && err.name !== "AbortError") {
-          console.error(err);
-          throw err;
+            // dispatch(projectUpdated({ updatedAt, actions, commit }));
+          } catch (err) {
+            if (err instanceof Error && err.name !== "AbortError") {
+              console.error(err);
+              throw err;
+            }
+          }
+        } finally {
+          next();
         }
-      }
-    } finally {
-      next();
-    }
-  });
+      }),
+    );
 
 export const forkAndReleaseBehaviors = createAppAsyncThunk<
   {
@@ -195,7 +201,6 @@ export const forkAndReleaseBehaviors = createAppAsyncThunk<
     });
 
     dispatch(
-      // @ts-expect-error redux problems
       trackEvent({
         action: "New Release: Core",
         label: `Behavior - ${forkedBehaviors

@@ -1,8 +1,7 @@
 import React, { FC, useEffect, useMemo } from "react";
-import { useDispatch, useSelector, useStore } from "react-redux";
+import { useStore } from "react-redux";
 import { HookRouter, setQueryParams, useRoutes } from "hookrouter";
 
-import type { AppDispatch } from "../../../features/types";
 import { HashRouterEffectFork } from "./Fork";
 import { HashRouterEffectNotFound } from "./NotFound";
 import { LinkableProject } from "../../../features/project/types";
@@ -13,6 +12,7 @@ import { parseAccessCodeInParams } from "../../../util/parseAccessCodeInParams";
 import { selectBootstrapped } from "../../../features/user/selectors";
 import { selectCurrentProjectUrl } from "../../../features/project/selectors";
 import { urlFromProject } from "../../../routes";
+import { useAppDispatch, useAppSelector } from "../../../features/hooks";
 import { useHandlePromiseRejection } from "../../ErrorBoundary";
 import { withSignal } from "../../../util/withSignal";
 
@@ -36,9 +36,9 @@ const routeHandler = ({
 const HashRouterEffectProjectFetch: FC<{
   project: LinkableProject;
 }> = ({ project }) => {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const handlePromiseRejection = useHandlePromiseRejection();
-  const bootstrapped = useSelector(selectBootstrapped);
+  const bootstrapped = useAppSelector(selectBootstrapped);
   const store = useStore();
 
   useEffect(() => {
@@ -72,9 +72,7 @@ const HashRouterEffectProjectFetch: FC<{
 
     async function fetch() {
       await withSignal(
-        //@ts-expect-error redux problems
         dispatch(
-          //@ts-expect-error redux problems
           fetchProject({
             project,
             fromLegacy: !!fromLegacy,
