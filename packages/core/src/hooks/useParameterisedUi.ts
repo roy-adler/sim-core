@@ -9,7 +9,7 @@ export const getUiQueryParams = () => {
   const {
     view = TabKind.ThreeD,
     editor = true,
-    activity = true,
+    activity,
     viewer = true,
     tabs = null,
   } = getSafeQueryParams();
@@ -17,7 +17,7 @@ export const getUiQueryParams = () => {
   return {
     view: view === "plots" ? TabKind.Analysis : view,
     editor: editor !== "false",
-    activity: activity !== "false",
+    activity: activity === "true",
     viewer: viewer !== "false",
     tabs: typeof tabs === "string" ? tabs.split(",") : null,
   };

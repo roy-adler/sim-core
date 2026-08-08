@@ -75,7 +75,7 @@ const viewerInitialState: ViewerSlice = {
   ],
   userAlerts: [],
   editor: true,
-  activity: true,
+  activity: false,
   embedded: false,
   viewer: true,
 };
