@@ -127,7 +127,7 @@
   border: none;
   fill: var(--theme-white);
   border-radius: 0.4rem;
-  margin-right: 0.6rem;
+  margin-right: 0;
 }
 
 .AgentInspector__ClearSelection:hover {
@@ -168,9 +168,4 @@
 .AgentInspector__Collapse:focus-visible {
   background-color: var(--selected-background-color);
   color: var(--theme-white);
-}
-
-/* Clear button margin moved to HeaderActions */
-.AgentInspector__ClearSelection {
-  margin-right: 0;
 }

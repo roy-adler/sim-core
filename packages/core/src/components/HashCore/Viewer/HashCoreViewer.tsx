@@ -1,6 +1,8 @@
-import React, { FC, lazy, Suspense } from "react";
+import React, { FC, lazy, Suspense, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useRecoilValue } from "recoil";
 
+import * as sceneState from "../../AgentScene/state/SceneState";
 import { Scope, useScope } from "../../../features/scopes";
 import { SimulationRunner } from "../../SimulationRunner/SimulationRunner";
 import { SimulationViewer } from "../../SimulationViewer";
@@ -36,6 +38,25 @@ export const HashCoreViewer: FC = () => {
   };
 
   useInstructionReceiver();
+
+  // Open the inspector when an agent is newly selected in the 3D viewer.
+  // AgentMesh lives inside the react-three-fiber Canvas, a separate React
+  // root where the redux context isn't bridged (only Recoil is), so we
+  // watch the shared Recoil selection state from here instead of
+  // dispatching from within the Canvas.
+  const selectedAgentIds = useRecoilValue(sceneState.SelectedAgentIds);
+  const prevSelectedAgentIdsRef = useRef<Record<string, true>>({});
+  useEffect(() => {
+    const prevSelectedAgentIds = prevSelectedAgentIdsRef.current;
+    const newlySelected = Object.keys(selectedAgentIds).some(
+      (id) => !prevSelectedAgentIds[id],
+    );
+    prevSelectedAgentIdsRef.current = selectedAgentIds;
+
+    if (newlySelected) {
+      dispatch(showActivity());
+    }
+  }, [selectedAgentIds, dispatch]);
 
   const viewerRef = useResizeObserver(
     ({ width }) => {
