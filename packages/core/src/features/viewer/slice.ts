@@ -74,7 +74,7 @@ const viewerInitialState: ViewerSlice = {
     TabKind.ProcessChart,
   ],
   userAlerts: [],
-  editor: true,
+  editor: false,
   activity: false,
   embedded: false,
   viewer: true,
@@ -101,6 +101,8 @@ export const {
     showActivity,
     toggleActivity,
     toggleEditor,
+    hideEditor,
+    showEditor,
     activateEmbedded,
     setProcessChart,
     toggleViewer,
@@ -143,6 +145,18 @@ export const {
 
     toggleEditor(state) {
       state.editor = !state.editor;
+    },
+
+    hideEditor(state) {
+      if (state.editor) {
+        state.editor = false;
+      }
+    },
+
+    showEditor(state) {
+      if (!state.editor) {
+        state.editor = true;
+      }
     },
 
     hideActivity(state) {

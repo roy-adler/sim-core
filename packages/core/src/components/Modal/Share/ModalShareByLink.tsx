@@ -23,7 +23,7 @@ const defaultParams: ModalShareViewsParams & {
   viewer?: boolean;
 } = {
   view: viewerTabs[0].kind,
-  editor: true,
+  editor: false,
   // Matches the boot default (activity pane hidden by default), so leaving
   // the "show activity" checkbox unchecked emits `activity=true` in the
   // URL (differs from default) and share links can open the pane.

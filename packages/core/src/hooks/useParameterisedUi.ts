@@ -8,7 +8,7 @@ import { initialiseView } from "../features/viewer/slice";
 export const getUiQueryParams = () => {
   const {
     view = TabKind.ThreeD,
-    editor = true,
+    editor,
     activity,
     viewer = true,
     tabs = null,
@@ -16,7 +16,7 @@ export const getUiQueryParams = () => {
 
   return {
     view: view === "plots" ? TabKind.Analysis : view,
-    editor: editor !== "false",
+    editor: editor === "true",
     activity: activity === "true",
     viewer: viewer !== "false",
     tabs: typeof tabs === "string" ? tabs.split(",") : null,

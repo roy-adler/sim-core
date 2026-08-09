@@ -24,3 +24,24 @@ describe("getUiQueryParams activity default", () => {
     expect(getUiQueryParams().activity).toBe(false);
   });
 });
+
+describe("getUiQueryParams editor default", () => {
+  afterEach(() => {
+    setSearch("");
+  });
+
+  it("defaults editor to false when param is absent", () => {
+    setSearch("");
+    expect(getUiQueryParams().editor).toBe(false);
+  });
+
+  it("enables editor when editor=true", () => {
+    setSearch("editor=true");
+    expect(getUiQueryParams().editor).toBe(true);
+  });
+
+  it("keeps editor false when editor=false", () => {
+    setSearch("editor=false");
+    expect(getUiQueryParams().editor).toBe(false);
+  });
+});
