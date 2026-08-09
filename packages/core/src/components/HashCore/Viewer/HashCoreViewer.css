@@ -14,8 +14,8 @@
 .HashCoreViewer__InspectorEdgeTab {
   position: absolute;
   right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 2.2rem; /* align with AgentInspector header / collapse control */
+  transform: none;
   z-index: 5;
   width: 18px;
   height: 48px;
