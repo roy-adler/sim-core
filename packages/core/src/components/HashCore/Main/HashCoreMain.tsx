@@ -36,6 +36,11 @@ export const HashCoreMain: FC = () => {
   );
   const prevFileIdRef = useRef<string | null | undefined>(undefined);
 
+  // Auto-expand on file switch only (not initial mount): HashCoreMain mounts
+  // after the project is loaded and setProject has already set currentFileId,
+  // so skipping the first run avoids spurious showEditor. We read raw
+  // files.currentFileId (not selectCurrentFileId) because the latter masks to
+  // globalsFileId when the editor is hidden.
   useEffect(() => {
     if (prevFileIdRef.current === undefined) {
       prevFileIdRef.current = currentFileId;
