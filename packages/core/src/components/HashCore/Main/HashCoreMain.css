@@ -3,3 +3,32 @@
   flex: auto;
   display: flex;
 }
+
+.HashCoreMain__EditorEdgeTab {
+  position: absolute;
+  left: 0;
+  top: 2.2rem;
+  z-index: 5;
+  width: 18px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--theme-border);
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  background: var(--theme-dark);
+  color: var(--theme-grey);
+  cursor: pointer;
+}
+
+.HashCoreMain__EditorEdgeTab:hover,
+.HashCoreMain__EditorEdgeTab:focus-visible {
+  background: var(--selected-background-color);
+  color: var(--theme-white);
+}
+
+.HashCoreMain__EditorEdgeTab .codicon {
+  font-size: 12px;
+}

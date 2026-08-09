@@ -1,9 +1,10 @@
 import React, { FC } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { HashCoreAside, HashCoreSection } from "..";
 import { WrappedSplitterLayout } from "../../WrappedSplitterLayout/WrappedSplitterLayout";
 import { selectEditorVisible } from "../../../features/viewer/selectors";
+import { showEditor } from "../../../features/viewer/slice";
 import { useAddClassOnClick } from "./util";
 
 import "./HashCoreMain.css";
@@ -27,6 +28,7 @@ export const HashCoreMain: FC = () => {
     );
   };
 
+  const dispatch = useDispatch();
   const editorVisible = useSelector(selectEditorVisible);
 
   return (
@@ -42,6 +44,16 @@ export const HashCoreMain: FC = () => {
         <HashCoreAside />
         <HashCoreSection />
       </WrappedSplitterLayout>
+      {!editorVisible ? (
+        <button
+          type="button"
+          aria-label="Show files and editor"
+          className="HashCoreMain__EditorEdgeTab"
+          onClick={() => dispatch(showEditor())}
+        >
+          <span className="codicon codicon-chevron-right" />
+        </button>
+      ) : null}
     </main>
   );
 };
