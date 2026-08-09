@@ -1,4 +1,6 @@
-import { defineConfig } from "vite";
+import fs from "fs";
+import path from "path";
+import { defineConfig, type Plugin } from "vite";
 import monacoEditorPluginCJS from "vite-plugin-monaco-editor";
 import react from "@vitejs/plugin-react";
 import timestampCJS from "time-stamp";
@@ -8,6 +10,61 @@ import topLevelAwait from "vite-plugin-top-level-await";
 //commonJS adaptor shims
 const monacoEditorPlugin = (monacoEditorPluginCJS as any).default;
 const utc = (timestampCJS as any).utc;
+
+// vite is started from packages/core (yarn workspace)
+const EXAMPLE_PROJECTS_DIR = path.resolve(
+  process.cwd(),
+  "../../example_projects",
+);
+
+function exampleProjectsStatic(): Plugin {
+  const mount = "/example_projects";
+  return {
+    name: "example-projects-static",
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (!req.url?.startsWith(`${mount}/`)) {
+          return next();
+        }
+        const name = path.basename(
+          decodeURIComponent(req.url.slice(mount.length).split("?")[0]),
+        );
+        if (!name.endsWith(".zip")) {
+          res.statusCode = 404;
+          res.end("Not found");
+          return;
+        }
+        const filePath = path.join(EXAMPLE_PROJECTS_DIR, name);
+        if (
+          !filePath.startsWith(EXAMPLE_PROJECTS_DIR) ||
+          !fs.existsSync(filePath)
+        ) {
+          res.statusCode = 404;
+          res.end("Not found");
+          return;
+        }
+        res.setHeader("Content-Type", "application/zip");
+        fs.createReadStream(filePath).pipe(res);
+      });
+    },
+    closeBundle() {
+      const outDir = path.resolve(process.cwd(), "dist/example_projects");
+      fs.mkdirSync(outDir, { recursive: true });
+      if (!fs.existsSync(EXAMPLE_PROJECTS_DIR)) {
+        return;
+      }
+      for (const name of fs.readdirSync(EXAMPLE_PROJECTS_DIR)) {
+        if (!name.endsWith(".zip")) {
+          continue;
+        }
+        fs.copyFileSync(
+          path.join(EXAMPLE_PROJECTS_DIR, name),
+          path.join(outDir, name),
+        );
+      }
+    },
+  };
+}
 
 export default defineConfig(({ mode }) => {
   const isProduction = mode === "production";
@@ -47,6 +104,9 @@ export default defineConfig(({ mode }) => {
               .filter(Boolean)
           : []),
       ],
+      fs: {
+        allow: [path.resolve(process.cwd(), "../.."), EXAMPLE_PROJECTS_DIR],
+      },
       // Prefetch transforms for the always-on shell; optimizeDeps.entries
       // already crawls lazy viewers for dependency discovery.
       warmup: {
@@ -92,6 +152,12 @@ export default defineConfig(({ mode }) => {
         "clipboard-polyfill", // only imported when navigator.clipboard is missing
       ],
     },
-    plugins: [wasm(), topLevelAwait(), react(), monacoEditorPlugin({})],
+    plugins: [
+      wasm(),
+      topLevelAwait(),
+      react(),
+      monacoEditorPlugin({}),
+      exampleProjectsStatic(),
+    ],
   };
 });

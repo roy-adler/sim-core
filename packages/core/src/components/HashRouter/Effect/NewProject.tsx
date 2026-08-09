@@ -32,34 +32,39 @@ export const HashRouterEffectNewProject: FC<{ template?: string }> = ({
     () => (
       <ModalNewProject
         onCancel={navigateAway}
-        //eslint-disable-next-line @typescript-eslint/require-await
         onSubmit={async (values) => {
-          //migration shim
+          try {
+            const project = await createNewSimulationProjectFromTemplate(
+              values.namespace,
+              values.path,
+              values.name,
+              values.visibility,
+              template,
+            );
 
-          const project = createNewSimulationProjectFromTemplate(
-            values.namespace,
-            values.path,
-            values.name,
-            values.visibility,
-            template,
-          );
+            dispatch(
+              trackEvent({
+                action: "New Project: Core",
+                label: project.pathWithNamespace,
+              }),
+            );
 
-          dispatch(
-            trackEvent({
-              action: "New Project: Core",
-              label: project.pathWithNamespace,
-            }),
-          );
-
-          dispatch(addUserProject(preparePartialSimulationProject(project)));
-          dispatch(setProjectWithMeta(project));
-          navigate(urlFromProject(project), false, {}, true);
+            dispatch(addUserProject(preparePartialSimulationProject(project)));
+            dispatch(setProjectWithMeta(project));
+            navigate(urlFromProject(project), false, {}, true);
+          } catch (err) {
+            fatalError(
+              err instanceof Error
+                ? err
+                : new Error("Failed to create project from template"),
+            );
+          }
         }}
         action="Create New Simulation"
         defaultNamespace={namespace}
       />
     ),
-    [dispatch, namespace, navigateAway],
+    [dispatch, namespace, navigateAway, template, fatalError],
   );
 
   useEffect(() => {

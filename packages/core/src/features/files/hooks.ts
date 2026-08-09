@@ -5,17 +5,11 @@ import { navigate } from "hookrouter";
 import { saveAs } from "file-saver";
 
 import { AppDispatch, RootState } from "../types";
-import { FilePathParts } from "../../util/files/types";
 import { HcFile } from "./types";
 import { HcFileKind } from "./enums";
-import {
-  ProjectFile,
-  RemoteSimulationProject,
-  SimulationProjectWithHcFiles,
-} from "../project/types";
+import { SimulationProjectWithHcFiles } from "../project/types";
 import { addUserProject } from "../user/slice";
-import { fromFormatted } from "../../util/files/parse";
-import { preparePartialSimulationProject, toHcConfig } from "../project/utils";
+import { preparePartialSimulationProject } from "../project/utils";
 import { save } from "../thunks";
 import {
   selectAllFiles,
@@ -25,8 +19,9 @@ import {
 import { selectCurrentProject } from "../project/selectors";
 import { setProjectWithMeta } from "../actions";
 import { slugify, urlFromProject } from "../../routes";
-import { stringifyBehaviorKeys, toHcFiles } from "./utils";
+import { stringifyBehaviorKeys } from "./utils";
 import { trackEvent } from "../analytics";
+import { projectFromZipBuffer } from "../../util/exampleProjects/projectFromZip";
 
 export const useSelectFileById = (fileId: string): HcFile => {
   try {
@@ -134,105 +129,19 @@ export const useImportFiles = () => {
     }
 
     const fileName = file.name.split(".").slice(0, -1).join(".");
-
-    let zip: JSZip;
-    try {
-      zip = await JSZip.loadAsync(file);
-    } catch (err: any) {
-      throw "Error unzipping " + file.name + ": " + err.message;
-    }
-    const projectFiles: ProjectFile[] = [];
-    const zipFiles: {
-      name: string;
-      contentPromise: Promise<string>;
-    }[] = [];
-
-    zip.forEach((_relativePath, zipEntry) => {
-      if (zipEntry.dir) {
-        // Skip directories.
-        return;
-      }
-
-      // Some zip files put leading '/'s on the file names.
-      // Trim those out so that HASH doesn't nest it as a folder.
-      while (zipEntry.name.startsWith("/")) {
-        zipEntry.name = zipEntry.name.slice(1);
-      }
-
-      if (zipEntry.name.startsWith(".")) {
-        // Skip hidden files
-        return;
-      }
-
-      let parsed: FilePathParts | null = null;
-      try {
-        parsed = fromFormatted(zipEntry.name);
-      } catch (err) {
-        console.warn("Skipping file in import:", zipEntry.name, err);
-        return;
-      }
-
-      if (parsed.dir) {
-        const permittedDirs = ["src", "data", "views", "dependencies"];
-        const candidateDir = parsed.dir.split("/")[0];
-        if (!permittedDirs.includes(candidateDir)) {
-          console.warn("Skipping directory in import", parsed.dir);
-          return;
-        }
-      }
-
-      // Convert to a simple array so we can later await the promises.
-      zipFiles.push({
-        name: zipEntry.name,
-        contentPromise: zipEntry.async("text"),
-      });
-    });
-
-    for (const zipFile of zipFiles) {
-      const contents = await zipFile.contentPromise;
-      projectFiles.push({
-        name: zipFile.name.replace(/^.*[\\/]/, ""),
-        path: zipFile.name,
-        contents: contents,
-        ref: "1.0",
-      });
-    }
-
-    const namespace = "@imported";
     const path = slugify(fileName);
 
-    const importedProject: RemoteSimulationProject = {
-      id: `${path}`,
-      name: path,
-      description: "",
-      image: null,
-      thumbnail: null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      canUserEdit: true,
-      pathWithNamespace: `${namespace}/${path}`,
-      namespace: namespace,
-      type: "Simulation",
-      ref: "main",
-      visibility: "public",
-      ownerType: "User",
-      forkOf: null,
-      latestRelease: null,
-      license: {
-        id: "5dc3da73cc0cf804dcc66a51",
-        name: "MIT License",
-      },
-      keywords: [],
-      files: projectFiles,
-    };
-
-    const project: SimulationProjectWithHcFiles = {
-      ...importedProject,
-      config: toHcConfig(importedProject),
-      files: toHcFiles(importedProject),
-      ref: importedProject.ref ?? "main",
-      access: null,
-    };
+    let project: SimulationProjectWithHcFiles;
+    try {
+      const buffer = await file.arrayBuffer();
+      project = await projectFromZipBuffer(buffer, {
+        namespace: "@imported",
+        path,
+        name: path,
+      });
+    } catch (err: any) {
+      throw "Error unzipping " + file.name + ": " + (err?.message ?? err);
+    }
 
     dispatch(
       trackEvent({
