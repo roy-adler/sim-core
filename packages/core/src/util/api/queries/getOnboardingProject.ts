@@ -22,15 +22,12 @@ export const getOnboardingProject =
     //     `
     // );
     const onBoardingProject = {
-      pathWithNamespace: "@imported/consensus-algorithms",
-      name: "Wildfires - Regrowth",
+      pathWithNamespace: "@examples/consensus-algorithms",
+      name: "Consensus Algorithms",
       updatedAt: "2022-05-19T13:57:26.000Z",
       type: "Simulation",
       visibility: "public",
-      latestRelease: {
-        createdAt: "2022-02-18T15:53:24.422Z",
-        tag: "9.9.0",
-      },
+      latestRelease: null,
       forkOf: null,
     } as any;
 
