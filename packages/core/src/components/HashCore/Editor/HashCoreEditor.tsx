@@ -398,8 +398,8 @@ export const HashCoreEditor: FC = () => {
             }}
             key="collapse-editor"
           >
-            <span className="codicon codicon-chevron-right" />
-            <span className="codicon codicon-chevron-right" />
+            <span className="codicon codicon-chevron-left" />
+            <span className="codicon codicon-chevron-left" />
           </button>,
         ]}
         tabsRef={tabsRef}

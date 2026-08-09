@@ -217,8 +217,8 @@ export const HashCoreFiles: FC = () => {
               dispatch(hideEditor());
             }}
           >
-            <span className="codicon codicon-chevron-right" />
-            <span className="codicon codicon-chevron-right" />
+            <span className="codicon codicon-chevron-left" />
+            <span className="codicon codicon-chevron-left" />
           </button>
         </li>
       </ul>
