@@ -36,6 +36,8 @@ RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
 
 # Copy only sources needed to build utils + WASM. Core/JS app changes must
 # not invalidate this layer or force a full engine rebuild.
+# engine-web/tsconfig.json extends ../../tsconfig.json
+COPY tsconfig.json ./
 COPY packages/utils ./packages/utils
 COPY packages/engine-types ./packages/engine-types
 COPY packages/engine ./packages/engine
