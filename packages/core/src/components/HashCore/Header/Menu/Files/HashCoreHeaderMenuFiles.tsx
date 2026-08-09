@@ -50,7 +50,7 @@ export const HashCoreHeaderMenuFiles: FC<HashCoreHeaderMenuFilesProps> = memo(
     onMouseEnterSubmenuItem,
     onMouseLeaveSubmenuItem,
     userProjects,
-    exampleProjects: _exampleProjects,
+    exampleProjects,
   }) => {
     const userProfileUrl = useSelector(selectUserProfileUrl);
     const project = useSelector(selectCurrentProject);
@@ -218,7 +218,7 @@ export const HashCoreHeaderMenuFiles: FC<HashCoreHeaderMenuFilesProps> = memo(
               </ul>
             </li>
           ) : null}
-          {/* {exampleProjects.length ? (
+          {userProjects.length ? (
             <li
               className="HashCoreHeaderMenu-submenu-item"
               onMouseEnter={onMouseEnterSubmenuItem}
@@ -236,7 +236,7 @@ export const HashCoreHeaderMenuFiles: FC<HashCoreHeaderMenuFilesProps> = memo(
                   .map(toListItem("Example"))}
               </ul>
             </li>
-          ) : null} */}
+          ) : null}
           <li className="HashCoreHeaderMenu-submenu-item">
             <input
               type="file"

@@ -13,6 +13,7 @@ services:
       - ./packages/core/vite.config.ts:/app/packages/core/vite.config.ts
       - ./packages/core/package.json:/app/packages/core/package.json
       - ./packages/engine-web/src:/app/packages/engine-web/src
+      - ./example_projects:/app/example_projects:ro
     environment:
       - NODE_ENV=development
     profiles:
