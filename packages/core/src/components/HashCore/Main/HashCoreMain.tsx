@@ -1,8 +1,9 @@
-import React, { FC } from "react";
+import React, { FC, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { HashCoreAside, HashCoreSection } from "..";
 import { WrappedSplitterLayout } from "../../WrappedSplitterLayout/WrappedSplitterLayout";
+import { selectFilesSlice } from "../../../features/files/selectors";
 import { selectEditorVisible } from "../../../features/viewer/selectors";
 import { showEditor } from "../../../features/viewer/slice";
 import { useAddClassOnClick } from "./util";
@@ -30,6 +31,22 @@ export const HashCoreMain: FC = () => {
 
   const dispatch = useDispatch();
   const editorVisible = useSelector(selectEditorVisible);
+  const currentFileId = useSelector(
+    (state) => selectFilesSlice(state).currentFileId,
+  );
+  const prevFileIdRef = useRef<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    if (prevFileIdRef.current === undefined) {
+      prevFileIdRef.current = currentFileId;
+      return;
+    }
+    const prev = prevFileIdRef.current;
+    prevFileIdRef.current = currentFileId;
+    if (currentFileId && currentFileId !== prev) {
+      dispatch(showEditor());
+    }
+  }, [currentFileId, dispatch]);
 
   return (
     <main className="HashCoreMain" ref={setContainerRef}>
