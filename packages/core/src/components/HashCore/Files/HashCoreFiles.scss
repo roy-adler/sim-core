@@ -16,10 +16,43 @@
   justify-content: flex-start;
   align-items: stretch;
   padding-left: calc(1rem - 4px);
+  padding-right: 0.6rem;
   height: 34px;
   background-color: var(--theme-darkest);
   margin: 0;
   flex-shrink: 0;
+}
+
+.HashCoreFiles__Actions__Spacer {
+  flex: 1;
+}
+
+.HashCoreFiles__Collapse {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--theme-grey);
+  cursor: pointer;
+  padding: 0.2rem;
+  border-radius: 0.25rem;
+  height: 100%;
+}
+
+.HashCoreFiles__Collapse .codicon {
+  font-size: 12px;
+  margin: 0;
+}
+
+.HashCoreFiles__Collapse .codicon + .codicon {
+  margin-left: -6px;
+}
+
+.HashCoreFiles__Collapse:hover,
+.HashCoreFiles__Collapse:focus-visible {
+  background-color: var(--selected-background-color);
+  color: var(--theme-white);
 }
 
 .HashCoreFiles ul:not(.HashCoreFiles__Actions) {

@@ -63,6 +63,7 @@ import {
   selectEditorVisible,
   selectEmbedded,
 } from "../../../features/viewer/selectors";
+import { hideEditor } from "../../../features/viewer/slice";
 import { trackEvent } from "../../../features/analytics";
 import { useNameNewBehaviorModal } from "../Files";
 import { useOnClickOutside } from "../../../hooks/useOnClickOutside";
@@ -387,6 +388,19 @@ export const HashCoreEditor: FC = () => {
               <p>Get context-specific help with building your model</p>
             </SimpleTooltip>
           </a>,
+          <button
+            type="button"
+            aria-label="Collapse files and editor"
+            className="HashCoreEditor__Collapse tab-button"
+            onClick={(evt) => {
+              evt.preventDefault();
+              dispatch(hideEditor());
+            }}
+            key="collapse-editor"
+          >
+            <span className="codicon codicon-chevron-right" />
+            <span className="codicon codicon-chevron-right" />
+          </button>,
         ]}
         tabsRef={tabsRef}
         selectedIndex={

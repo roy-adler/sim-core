@@ -18,6 +18,7 @@ import { ModalNewDataset } from "../../Modal/NewDataset/ModalNewDataset";
 import { Scope, useScopes } from "../../../features/scopes";
 import { addPreparedFile } from "../../../features/files/slice";
 import { openSearch } from "../../../features/search";
+import { hideEditor } from "../../../features/viewer/slice";
 import {
   selectCurrentFileRepoPath,
   selectFolderTree,
@@ -205,6 +206,21 @@ export const HashCoreFiles: FC = () => {
         >
           <IconMagnify />
         </HashCoreFilesHeaderAction>
+        <li className="HashCoreFiles__Actions__Spacer" />
+        <li>
+          <button
+            type="button"
+            aria-label="Collapse files and editor"
+            className="HashCoreFiles__Collapse"
+            onClick={(evt) => {
+              evt.preventDefault();
+              dispatch(hideEditor());
+            }}
+          >
+            <span className="codicon codicon-chevron-right" />
+            <span className="codicon codicon-chevron-right" />
+          </button>
+        </li>
       </ul>
 
       <ul className="HashCoreFiles__Files">

@@ -47,6 +47,33 @@
   flex: 1 1 100%;
 }
 
+.HashCoreEditor__Collapse {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--theme-grey);
+  cursor: pointer;
+  padding: 0.2rem;
+  border-radius: 0.25rem;
+}
+
+.HashCoreEditor__Collapse .codicon {
+  font-size: 12px;
+  margin: 0;
+}
+
+.HashCoreEditor__Collapse .codicon + .codicon {
+  margin-left: -6px;
+}
+
+.HashCoreEditor__Collapse:hover,
+.HashCoreEditor__Collapse:focus-visible {
+  background-color: var(--selected-background-color);
+  color: var(--theme-white);
+}
+
 // START CONFLICT MARKERS
 .HashCoreEditor__ConflictMarkers__StartHeading {
   background: var(--conflict-marker-start-heading-bg);
