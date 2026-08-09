@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import { HashCoreEditorContainer } from "../EditorContainer/HashCoreEditorContainer";
 import { HashCoreViewer } from "../Viewer/HashCoreViewer";
 import { WrappedSplitterLayout } from "../../WrappedSplitterLayout/WrappedSplitterLayout";
-import { selectDisplayEditorSection } from "../../../features/selectors";
 import {
   selectEditorVisible,
   selectEmbedded,
@@ -16,7 +15,6 @@ import "./HashCoreSection.css";
 
 export const HashCoreSection: FC = () => {
   const editorVisible = useSelector(selectEditorVisible);
-  const displayEditorSection = useSelector(selectDisplayEditorSection);
   const embedded = useSelector(selectEmbedded);
   const [vertical, setVertical] = useState(false);
   const viewerVisible = useSelector(selectViewerVisible);
@@ -48,7 +46,7 @@ export const HashCoreSection: FC = () => {
           secondaryMinSize={40}
           secondaryInitialSize={editorVisible ? 58 : vertical ? 65 : 75}
           customClassName={actuallyVertical ? "" : "splitter-layout--right"}
-          primaryHidden={!displayEditorSection}
+          primaryHidden={!editorVisible}
           vertical={actuallyVertical}
           primaryIndex={primaryIndex}
           secondaryHidden={!viewerVisible}
