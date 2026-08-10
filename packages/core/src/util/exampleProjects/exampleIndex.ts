@@ -1,4 +1,6 @@
-export type ExampleProjectsIndex = { zips: string[] };
+export interface ExampleProjectsIndex {
+  zips: string[];
+}
 
 export function parseExampleProjectsIndex(data: unknown): ExampleProjectsIndex {
   if (!data || typeof data !== "object") {

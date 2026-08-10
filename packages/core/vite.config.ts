@@ -48,7 +48,9 @@ function projectZipsStatic(): Plugin {
         const url = req.url?.split("?")[0] ?? "";
 
         if (url === "/example_projects/index.json") {
-          const body = JSON.stringify({ zips: listZipNames(EXAMPLE_PROJECTS_DIR) });
+          const body = JSON.stringify({
+            zips: listZipNames(EXAMPLE_PROJECTS_DIR),
+          });
           res.setHeader("Content-Type", "application/json");
           res.end(body);
           return;
@@ -85,7 +87,10 @@ function projectZipsStatic(): Plugin {
     },
     closeBundle() {
       const examplesOut = path.resolve(process.cwd(), "dist/example_projects");
-      const templatesOut = path.resolve(process.cwd(), "dist/project_templates");
+      const templatesOut = path.resolve(
+        process.cwd(),
+        "dist/project_templates",
+      );
       fs.mkdirSync(examplesOut, { recursive: true });
       fs.mkdirSync(templatesOut, { recursive: true });
 

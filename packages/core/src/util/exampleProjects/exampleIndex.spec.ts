@@ -14,9 +14,7 @@ describe("parseExampleProjectsIndex", () => {
 
   it("rejects non-zip entries and non-objects", () => {
     expect(() => parseExampleProjectsIndex(null)).toThrow();
-    expect(() =>
-      parseExampleProjectsIndex({ zips: ["readme.md"] }),
-    ).toThrow();
+    expect(() => parseExampleProjectsIndex({ zips: ["readme.md"] })).toThrow();
   });
 });
 

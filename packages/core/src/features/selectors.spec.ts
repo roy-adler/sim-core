@@ -1,10 +1,7 @@
 import { PartialSimulationProject } from "./project/types";
 import { pickDefaultLinkableProject } from "./selectors";
 
-const example = (
-  path: string,
-  updatedAt: string,
-): PartialSimulationProject =>
+const example = (path: string, updatedAt: string): PartialSimulationProject =>
   ({
     pathWithNamespace: path,
     name: path,
@@ -14,7 +11,7 @@ const example = (
     visibility: "public",
     latestRelease: null,
     forkOf: null,
-  } as PartialSimulationProject);
+  }) as PartialSimulationProject;
 
 describe("pickDefaultLinkableProject", () => {
   it("prefers most recent user project when any exist", () => {
