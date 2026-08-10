@@ -1,4 +1,4 @@
-/** Zips used only for New project templates — not Example projects menu. */
+/** Zips used only for New project templates — served from /project_templates. */
 export const TEMPLATE_ZIP_BY_KEY = {
   empty: "empty-project.zip",
   starter: "empty-template-project.zip",
@@ -6,14 +6,10 @@ export const TEMPLATE_ZIP_BY_KEY = {
 
 export type TemplateKey = keyof typeof TEMPLATE_ZIP_BY_KEY;
 
-export const TEMPLATE_ZIP_NAMES = new Set<string>(
-  Object.values(TEMPLATE_ZIP_BY_KEY),
-);
+/** Empty-state default when no user projects exist. */
+export const DEFAULT_EXAMPLE_SLUG = "consensus-algorithms" as const;
 
-/**
- * Shared example slugs (zip basename without .zip).
- * Keep in sync with repo-root example_projects/*.zip minus templates.
- */
+/** @deprecated Task 5 replaces this with /example_projects/index.json */
 export const EXAMPLE_PROJECT_SLUGS = [
   "ant-foraging",
   "boids-3d",
@@ -30,7 +26,8 @@ export const EXAMPLE_PROJECT_SLUGS = [
   "wildfires-regrowth",
 ] as const;
 
-export const DEFAULT_EXAMPLE_SLUG = "consensus-algorithms" as const;
-
 export const exampleZipUrl = (fileName: string): string =>
   `/example_projects/${fileName}`;
+
+export const templateZipUrl = (fileName: string): string =>
+  `/project_templates/${fileName}`;

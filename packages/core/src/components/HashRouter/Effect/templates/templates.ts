@@ -2,7 +2,7 @@ import {
   ProjectVisibility,
   SimulationProjectWithHcFiles,
 } from "../../../../features/project/types";
-import { fetchExampleZip } from "../../../../util/exampleProjects/fetchExampleZip";
+import { fetchTemplateZip } from "../../../../util/exampleProjects/fetchTemplateZip";
 import {
   TEMPLATE_ZIP_BY_KEY,
   TemplateKey,
@@ -27,7 +27,7 @@ export const createNewSimulationProjectFromTemplate = async (
     throw new Error(`Unrecognized template ${template}`);
   }
 
-  const buffer = await fetchExampleZip(zipName);
+  const buffer = await fetchTemplateZip(zipName);
   const fromZip = await projectFromZipBuffer(buffer, {
     namespace,
     path,
