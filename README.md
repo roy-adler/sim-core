@@ -22,7 +22,7 @@ It uses a legacy version of hEngine which is no longer maintained, separate from
 - [ ] Introduce local file storage for working offline (outside of local storage)
 - [ ] Introduce GitHub integration for simulation management and storage
 - [ ] Introduce prompt to ask users to insert Mapbox keys (securely stored) where not provided as an environment variable
-- [ ] Re-introduce "Example projects" accessible via the menus
+- [x] Re-introduce "Example projects" accessible via the menus
 - [ ] Re-enable Git-based UI elements (such as the resources and activity panes, as well as ability to fork projects)
 - [ ] Re-enable executing simulations in hCloud from hCore itself (allowing access to cloud-only features such as optimization experiments)
 
@@ -39,7 +39,7 @@ In its present form, the version of hCore published here is for the most part li
 1. To open a simulation, use the 'import' functionality and target a `.zip` file containing a previously exported simulation. _This can be downloaded from a project's hIndex listing page._
 1. You can now run and edit this simulation, however file storage is simply maintained within your browser (using `localstorage`), and changes you make will only be preserved within this web browser.
 1. You can use the 'recent projects' menu to switch between other projects that you have imported.
-1. To experiment with an example project, import an example project .zip file from the `example_projects` folder.
+1. To open a built-in demo, use **File → Example projects** (seeded from the `example_projects/` folder). Empty/Starter new-project templates come from `project_templates/`.
 
 Please exercise caution if authoring work inside the self-hosted environment because any simulations you author are **not being preserved** outside of the browser environment.  These limitations will lift as the project status goals above are accomplished.
 
