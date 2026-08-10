@@ -1,5 +1,6 @@
 services:
-  # Development build
+  # Local development: bind-mounts host source over the image for live edits.
+  # Host paths must exist and contain real files — empty dirs hide image content.
   hash-core-dev:
     build:
       context: .
@@ -18,3 +19,17 @@ services:
       - NODE_ENV=development
     profiles:
       - development
+
+  # VPS / server: use the code baked into the image. No bind mounts.
+  # Requires a full repo as build context (or a prebuilt image), not just the Dockerfile.
+  hash-core-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: yarn-server
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+    profiles:
+      - production

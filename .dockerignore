@@ -106,6 +106,3 @@ jspm_packages/
 # Documentation
 README.md
 *.md
-
-# Example projects (if they're large)
-example_projects/*.zip 
