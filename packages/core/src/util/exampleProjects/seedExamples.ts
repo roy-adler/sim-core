@@ -5,12 +5,13 @@ import {
 } from "../../features/project/types";
 import { getLocalStorageProject } from "../../features/project/utils";
 import { setLocalStorageProject } from "../../features/middleware/localStorage";
+import {
+  parseExampleProjectsIndex,
+  slugsFromExampleIndex,
+} from "./exampleIndex";
 import { fetchExampleZip } from "./fetchExampleZip";
 import { humanizeSlug } from "./humanizeSlug";
-import {
-  DEFAULT_EXAMPLE_SLUG,
-  EXAMPLE_PROJECT_SLUGS,
-} from "./manifest";
+import { exampleProjectsIndexUrl } from "./manifest";
 import { projectFromZipBuffer } from "./projectFromZip";
 
 const partialFromProject = (
@@ -39,7 +40,20 @@ export async function seedExampleProjects(): Promise<
 > {
   const results: UnpreparedPartialSimulationProject[] = [];
 
-  for (const slug of EXAMPLE_PROJECT_SLUGS) {
+  let slugs: string[] = [];
+  try {
+    const indexRes = await fetch(exampleProjectsIndexUrl());
+    if (!indexRes.ok) {
+      throw new Error(`index.json ${indexRes.status}`);
+    }
+    const index = parseExampleProjectsIndex(await indexRes.json());
+    slugs = slugsFromExampleIndex(index);
+  } catch (err) {
+    console.error("Failed to load example projects index:", err);
+    return [];
+  }
+
+  for (const slug of slugs) {
     const pathWithNamespace = `@examples/${slug}`;
     const existing = getLocalStorageProject(pathWithNamespace, "main");
     if (existing) {
@@ -61,15 +75,6 @@ export async function seedExampleProjects(): Promise<
     }
   }
 
-  results.sort((a, b) => {
-    if (a.pathWithNamespace.endsWith(`/${DEFAULT_EXAMPLE_SLUG}`)) {
-      return -1;
-    }
-    if (b.pathWithNamespace.endsWith(`/${DEFAULT_EXAMPLE_SLUG}`)) {
-      return 1;
-    }
-    return a.name.localeCompare(b.name);
-  });
-
+  results.sort((a, b) => a.name.localeCompare(b.name));
   return results;
 }
