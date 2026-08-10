@@ -218,7 +218,7 @@ export const HashCoreHeaderMenuFiles: FC<HashCoreHeaderMenuFilesProps> = memo(
               </ul>
             </li>
           ) : null}
-          {userProjects.length ? (
+          {exampleProjects.length ? (
             <li
               className="HashCoreHeaderMenu-submenu-item"
               onMouseEnter={onMouseEnterSubmenuItem}
@@ -232,7 +232,7 @@ export const HashCoreHeaderMenuFiles: FC<HashCoreHeaderMenuFilesProps> = memo(
               />
               <ul>
                 {[...exampleProjects]
-                  .sort(descByUpdatedAt)
+                  .sort((a, b) => a.name.localeCompare(b.name))
                   .map(toListItem("Example"))}
               </ul>
             </li>
