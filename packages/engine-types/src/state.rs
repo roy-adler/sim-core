@@ -289,7 +289,10 @@ impl<'de> Deserialize<'de> for Agent {
                             };
                         }
                         AgentStateField::AgentName => {
-                            agent_state_buf.agent_name = Some(map.next_value()?);
+                            // Deserialize as Option so JSON/JS `null` (or undefined via
+                            // serde-wasm-bindgen) becomes None instead of failing with
+                            // "invalid type: unit value, expected a string".
+                            agent_state_buf.agent_name = map.next_value()?;
                         }
                         AgentStateField::Behaviors => {
                             agent_state_buf.behaviors = map.next_value()?;
@@ -312,13 +315,13 @@ impl<'de> Deserialize<'de> for Agent {
                             agent_state_buf.position = map.next_value()?;
                         }
                         AgentStateField::Direction => {
-                            agent_state_buf.direction = Some(map.next_value()?);
+                            agent_state_buf.direction = map.next_value()?;
                         }
                         AgentStateField::Velocity => {
-                            agent_state_buf.velocity = Some(map.next_value()?);
+                            agent_state_buf.velocity = map.next_value()?;
                         }
                         AgentStateField::SearchRadius => {
-                            agent_state_buf.search_radius = Some(map.next_value()?);
+                            agent_state_buf.search_radius = map.next_value()?;
                         }
                         AgentStateField::PositionWasCorrected => {
                             agent_state_buf.position_was_corrected = map.next_value()?;
@@ -327,10 +330,10 @@ impl<'de> Deserialize<'de> for Agent {
                             agent_state_buf.behavior_index = map.next_value()?;
                         }
                         AgentStateField::Shape => {
-                            agent_state_buf.shape = Some(map.next_value()?);
+                            agent_state_buf.shape = map.next_value()?;
                         }
                         AgentStateField::Height => {
-                            agent_state_buf.height = Some(map.next_value()?);
+                            agent_state_buf.height = map.next_value()?;
                         }
                         AgentStateField::Scale => {
                             // The default values for a Vec3 are all zeros. However, we
@@ -342,10 +345,10 @@ impl<'de> Deserialize<'de> for Agent {
                             agent_state_buf.scale = scale;
                         }
                         AgentStateField::Color => {
-                            agent_state_buf.color = Some(map.next_value()?);
+                            agent_state_buf.color = map.next_value()?;
                         }
                         AgentStateField::RGB => {
-                            agent_state_buf.rgb = Some(map.next_value()?);
+                            agent_state_buf.rgb = map.next_value()?;
                         }
                         AgentStateField::Hidden => {
                             agent_state_buf.hidden = map.next_value()?;
@@ -435,6 +438,26 @@ fn deserialize_custom_fields_survives_json_roundtrip() {
         Some(&serde_json::json!([1, 2, 3]))
     );
     assert_eq!(agent.custom.get("allMessages"), Some(&serde_json::json!([])));
+}
+
+#[test]
+fn deserialize_null_optional_string_fields() {
+    // JS agents often set `color: undefined` / `null` when a globals key is missing.
+    // serde-wasm-bindgen surfaces that as unit/null; Option fields must accept it.
+    let agent: Agent = serde_json::from_str(
+        r#"
+        {
+            "agent_id": "null-color-agent",
+            "color": null,
+            "shape": null,
+            "height": null
+        }
+        "#,
+    )
+    .expect("null optional fields should deserialize");
+    assert_eq!(agent.color, None);
+    assert_eq!(agent.shape, None);
+    assert_eq!(agent.height, None);
 }
 
 #[test]
