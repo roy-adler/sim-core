@@ -3,6 +3,7 @@ import JSZip from "jszip";
 import {
   projectFilesFromZip,
   buildSimulationProjectFromFiles,
+  projectFromZipBuffer,
 } from "./projectFromZip";
 import { humanizeSlug } from "./humanizeSlug";
 
@@ -76,5 +77,31 @@ describe("buildSimulationProjectFromFiles", () => {
     expect(project.namespace).toBe("@examples");
     expect(project.ref).toBe("main");
     expect(project.files.length).toBeGreaterThan(0);
+  });
+});
+
+describe("projectFromZipBuffer", () => {
+  it("uses string paths from hash.json files", async () => {
+    const zip = new JSZip();
+    zip.file(
+      "hash.json",
+      JSON.stringify({
+        files: ["README.md", "src/globals.json"],
+      }),
+    );
+    zip.file("README.md", "# Hi");
+    zip.file("src/globals.json", "{}");
+
+    const project = await projectFromZipBuffer(
+      (await zip.generateAsync({
+        type: "nodebuffer",
+      })) as unknown as ArrayBuffer,
+      {
+        namespace: "@examples",
+        path: "string-file-config",
+      },
+    );
+
+    expect(project.config.files).toEqual(["README.md", "src/globals.json"]);
   });
 });

@@ -64,12 +64,18 @@ export const toHcConfig = (
   } catch (exception) {
     // TODO: track event
   }
+  const configFilePaths =
+    config.files
+      ?.map((file: any) =>
+        typeof file === "string" ? file : file?.filename ?? file?.path,
+      )
+      .filter(
+        (path): path is string =>
+          typeof path === "string" && !isBehaviorKeyFile(path),
+      ) ?? [];
   return {
     ...config,
-    files:
-      config.files
-        ?.filter((file: any) => !isBehaviorKeyFile(file.filename ?? file.path))
-        .map((file: any) => file.filename ?? file.path) ?? [],
+    files: configFilePaths,
   };
 };
 
