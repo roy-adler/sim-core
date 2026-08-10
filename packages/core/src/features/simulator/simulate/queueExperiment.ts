@@ -51,6 +51,7 @@ import {
   updatePendingExperimentTime,
 } from "./slice";
 import { addUserAlert } from "../../viewer";
+import { showActivity } from "../../viewer/slice";
 import { store as appStore } from "../../store";
 import { earlyStopSimulation } from "./thunks";
 import { historicCloudExperimentProvider } from "../historicCloudExperimentProvider";
@@ -194,6 +195,7 @@ export const queueExperiment =
         definition: experiments[experimentName],
       }),
     );
+    appStore.dispatch(showActivity());
 
     // Track this this event and the associated runs
     const label = `${project?.name} - ${experimentName} - ${projectUrl}`;

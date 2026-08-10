@@ -641,6 +641,10 @@ const { reducer, actions } = createSlice({
      */
     setCloudDisabled(state, action: PayloadAction<boolean>) {
       state.cloudDisabled = action.payload;
+      // Local-only mode has no remote history pages to fetch.
+      if (action.payload) {
+        state.history.complete = true;
+      }
     },
 
     removeSimulationData(state, action: PayloadAction<string>) {
@@ -903,6 +907,8 @@ const { reducer, actions } = createSlice({
         project: state.history.project,
         visible: state.history.visible,
         selectedCommitGroup: state.history.selectedCommitGroup,
+        // Keep local-only history usable without hCloud pagination.
+        complete: state.cloudDisabled,
       };
     },
 
@@ -1799,6 +1805,8 @@ export const simulationReducer: typeof reducer = (
         ...historyInitialState,
         project: nextProject,
         visible: state.history.visible,
+        // Local-only mode has no remote history pages to fetch.
+        complete: state.cloudDisabled,
       },
     };
   } else if (updatePlotData.match(action)) {

@@ -58,11 +58,13 @@ export const historySubscriber = (store: Store<SimulatorRootState>) => {
     const ready = selectHistoryReady(state);
     const historyProject = selectHistoryProject(state);
     const visible = selectHistoryVisible(state);
+    const cloudDisabled = state.simulator.cloudDisabled;
 
     const shouldBeRunning =
       visible &&
       ready &&
       !complete &&
+      !cloudDisabled &&
       historyProject &&
       (!runningState || runningState.historyProject === historyProject) &&
       (!hasFilledScreen || requestingMore || runningState?.wasRequestingMore);

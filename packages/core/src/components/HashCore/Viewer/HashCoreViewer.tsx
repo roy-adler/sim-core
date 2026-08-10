@@ -16,7 +16,7 @@ import { useInstructionReceiver } from "../useInstructionReceiver";
 import { useResizeObserver } from "../../../hooks/useResizeObserver/useResizeObserver";
 
 import "./HashCoreViewer.css";
-import { AgentInspectorSplitterLayout } from "../../ActivityHistory/Inspector/Inspector";
+import { ActivityHistory } from "../../ActivityHistory";
 
 const LazyOpenInCore = lazy(() =>
   import(
@@ -87,8 +87,7 @@ export const HashCoreViewer: FC = () => {
             </Suspense>
           ) : null}
         </div>
-        {/* <ActivityHistory visible={activityVisible} /> */}
-        <AgentInspectorSplitterLayout />
+        <ActivityHistory visible={activityVisible} />
       </WrappedSplitterLayout>
       {showInspectorEdgeTab ? (
         <button
