@@ -11,55 +11,99 @@ import topLevelAwait from "vite-plugin-top-level-await";
 const monacoEditorPlugin = (monacoEditorPluginCJS as any).default;
 const utc = (timestampCJS as any).utc;
 
-// vite is started from packages/core (yarn workspace)
-const EXAMPLE_PROJECTS_DIR = path.resolve(
-  process.cwd(),
-  "../../example_projects",
-);
+const REPO_ROOT = path.resolve(process.cwd(), "../..");
+const EXAMPLE_PROJECTS_DIR = path.join(REPO_ROOT, "example_projects");
+const PROJECT_TEMPLATES_DIR = path.join(REPO_ROOT, "project_templates");
 
-function exampleProjectsStatic(): Plugin {
-  const mount = "/example_projects";
+function listZipNames(dir: string): string[] {
+  if (!fs.existsSync(dir)) {
+    return [];
+  }
+  return fs
+    .readdirSync(dir)
+    .filter((name) => name.endsWith(".zip") && !name.startsWith("."))
+    .sort((a, b) => a.localeCompare(b));
+}
+
+function sendZip(
+  dir: string,
+  name: string,
+  res: import("http").ServerResponse,
+) {
+  const filePath = path.join(dir, name);
+  if (!filePath.startsWith(dir) || !fs.existsSync(filePath)) {
+    res.statusCode = 404;
+    res.end("Not found");
+    return;
+  }
+  res.setHeader("Content-Type", "application/zip");
+  fs.createReadStream(filePath).pipe(res);
+}
+
+function projectZipsStatic(): Plugin {
   return {
-    name: "example-projects-static",
+    name: "project-zips-static",
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
-        if (!req.url?.startsWith(`${mount}/`)) {
-          return next();
-        }
-        const name = path.basename(
-          decodeURIComponent(req.url.slice(mount.length).split("?")[0]),
-        );
-        if (!name.endsWith(".zip")) {
-          res.statusCode = 404;
-          res.end("Not found");
+        const url = req.url?.split("?")[0] ?? "";
+
+        if (url === "/example_projects/index.json") {
+          const body = JSON.stringify({ zips: listZipNames(EXAMPLE_PROJECTS_DIR) });
+          res.setHeader("Content-Type", "application/json");
+          res.end(body);
           return;
         }
-        const filePath = path.join(EXAMPLE_PROJECTS_DIR, name);
-        if (
-          !filePath.startsWith(EXAMPLE_PROJECTS_DIR) ||
-          !fs.existsSync(filePath)
-        ) {
-          res.statusCode = 404;
-          res.end("Not found");
+
+        if (url.startsWith("/example_projects/")) {
+          const name = path.basename(
+            decodeURIComponent(url.slice("/example_projects/".length)),
+          );
+          if (!name.endsWith(".zip")) {
+            res.statusCode = 404;
+            res.end("Not found");
+            return;
+          }
+          sendZip(EXAMPLE_PROJECTS_DIR, name, res);
           return;
         }
-        res.setHeader("Content-Type", "application/zip");
-        fs.createReadStream(filePath).pipe(res);
+
+        if (url.startsWith("/project_templates/")) {
+          const name = path.basename(
+            decodeURIComponent(url.slice("/project_templates/".length)),
+          );
+          if (!name.endsWith(".zip")) {
+            res.statusCode = 404;
+            res.end("Not found");
+            return;
+          }
+          sendZip(PROJECT_TEMPLATES_DIR, name, res);
+          return;
+        }
+
+        next();
       });
     },
     closeBundle() {
-      const outDir = path.resolve(process.cwd(), "dist/example_projects");
-      fs.mkdirSync(outDir, { recursive: true });
-      if (!fs.existsSync(EXAMPLE_PROJECTS_DIR)) {
-        return;
-      }
-      for (const name of fs.readdirSync(EXAMPLE_PROJECTS_DIR)) {
-        if (!name.endsWith(".zip")) {
-          continue;
-        }
+      const examplesOut = path.resolve(process.cwd(), "dist/example_projects");
+      const templatesOut = path.resolve(process.cwd(), "dist/project_templates");
+      fs.mkdirSync(examplesOut, { recursive: true });
+      fs.mkdirSync(templatesOut, { recursive: true });
+
+      const exampleZips = listZipNames(EXAMPLE_PROJECTS_DIR);
+      fs.writeFileSync(
+        path.join(examplesOut, "index.json"),
+        JSON.stringify({ zips: exampleZips }),
+      );
+      for (const name of exampleZips) {
         fs.copyFileSync(
           path.join(EXAMPLE_PROJECTS_DIR, name),
-          path.join(outDir, name),
+          path.join(examplesOut, name),
+        );
+      }
+      for (const name of listZipNames(PROJECT_TEMPLATES_DIR)) {
+        fs.copyFileSync(
+          path.join(PROJECT_TEMPLATES_DIR, name),
+          path.join(templatesOut, name),
         );
       }
     },
@@ -105,7 +149,7 @@ export default defineConfig(({ mode }) => {
           : []),
       ],
       fs: {
-        allow: [path.resolve(process.cwd(), "../.."), EXAMPLE_PROJECTS_DIR],
+        allow: [REPO_ROOT, EXAMPLE_PROJECTS_DIR, PROJECT_TEMPLATES_DIR],
       },
       // Prefetch transforms for the always-on shell; optimizeDeps.entries
       // already crawls lazy viewers for dependency discovery.
@@ -157,7 +201,7 @@ export default defineConfig(({ mode }) => {
       topLevelAwait(),
       react(),
       monacoEditorPlugin({}),
-      exampleProjectsStatic(),
+      projectZipsStatic(),
     ],
   };
 });
